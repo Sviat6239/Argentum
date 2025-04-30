@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="contact-section py-5">
+    <div class="container">
+        <h2 class="display-4 text-center mb-4">Контакти</h2>
+        <p class="lead text-center mb-5"></p>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 bg-green-highlight">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Адреса</h5>
+                        <p class="card-text">📍</p>
+                        <a href="https://www.google.com/maps/place/Oficerska+15,+81-548+Gdynia/@54.4763179,18.5406696,17.82z/data=!4m6!3m5!1s0x46fda0912f59f32d:0x90ed26aab0da3161!8m2!3d54.4761401!4d18.5417186!16s%2Fg%2F11crqmz59s?authuser=0&entry=ttu"
+                            target="_blank" class="btn btn-primary animated-button">Відкрити на карті</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 bg-green-highlight">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Телефон</h5>
+                        <p class="card-text">📞</p>
+                        <button class="btn btn-primary animated-button" data-copy="">Скопіювати номер</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 bg-green-highlight">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Електронна пошта</h5>
+                        <p class="card-text">✉️ example@example.com</p>
+                        <button class="btn btn-primary animated-button" data-copy="example@example.com">Скопіювати
+                            email</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 bg-green-highlight">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Години роботи</h5>
+                        <p class="card-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+{% endblock %}

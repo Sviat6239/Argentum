@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GroupPortal</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet">
+
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <a class="navbar-brand" href="/">GroupPortal</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about/">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contacts/">Contacts</a>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/creaturepanel/">Create</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/recent">Recent</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout/">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/register/">Register</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login/">Login</a>
+                </li>
+                {% endif %}
+            </ul>
+            <button class="btn btn-theme ml-auto" id="themeToggle">🌙 Dark Mode</button>
+        </div>
+    </nav>
+    <div class="container mt-5">
+        <div id="flash-message" class="flash-message"></div>
+        {% block content %}{% endblock %}
+    </div>
+    <footer class="footer text-center py-3 bg-light shadow-sm">
+        <div class="container">
+            <span class="text-muted">GroupPortal© 2025</span>
+            <div class="mt-3">
+                <p>Для пожертвувань:</p>
+                <p>Банківський рахунок: 1234567890</p>
+                <p>PayPal: donate@example.com</p>
+                <p>Дякуємо за вашу підтримку!</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+
+</body>
+
+
+</html>
