@@ -3,8 +3,18 @@ from autentification.models import User
 from django.utils import timezone
 
 
+class Hub(models.Model):
+    id = models.AutoField(primary_key=True, auto_created=True)
+    name = models.CharField(max_length=320)
+    description = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
 class Post(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
+    hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=320)
     content = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -94,9 +104,6 @@ class Collaboration(models.Model):
     pass
 
 class Feedback(models.Model):
-    pass
-
-class Hub(models.Model):
     pass
 
 class Karma(models.Model):
