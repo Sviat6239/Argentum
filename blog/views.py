@@ -53,7 +53,7 @@ def CreateCommentVIew(request):
         context = {'form': form}
     return render(request, template_name, context)
     
-def ShowCommentView(request):
+def ShowCommentView(request):*
     obj = Post.objects.all()
     template_name = "view_comment.html"
     context = {'obl': obj}

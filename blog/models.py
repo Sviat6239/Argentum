@@ -3,18 +3,35 @@ from autentification.models import User
 from django.utils import timezone
 
 
-class Hub(models.Model):
+class Category(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
-    name = models.CharField(max_length=320)
-    description = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=60)
 
     def __str__(self):
-        return self.name
+        return self.title
+
+class Tag(models.Model):
+    id = models.AutoField(primary_key=True, auto_created=True)
+    title = models.Charfield(max_length=60)
+
+    def __str__(self):
+        return self.title
+
+class Hub(models.Model):
+    id = models.AutoField(primary_key=True, auto_created=True)
+    title = models.CharField(max_length=320)
+    description = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.title
 
 class Post(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
     hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='posts')
+    category = models.ForeignKey(Category, on_delete=models.Cascade, related_name='categories')
+    tag = models.ForeignKey(Tag, on_delete=models.Cascade, related_name='tags')
     title = models.CharField(max_length=320)
     content = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -33,15 +50,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.author.username} - {self.content[:30]}"
-
-class Category(models.Model):
-    pass
-
-class Tag(models.Model):
-    pass
-
-class UserProfile(models.Model):
-    pass
+    
 
 class Media(models.Model):
     pass
