@@ -39,7 +39,7 @@ class CommentForm(forms.ModelForm):
             'created_at': 'Created At'
         }        
 
-        widgwts = {
+        widgets = {
             'post': forms.Select(),
             'content':forms.Textarea(attrs={'Placeholder': 'eg. Nice post!'}),
             'author': forms.Select(),

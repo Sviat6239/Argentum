@@ -2,6 +2,12 @@ from django.shortcuts import redirect, render
 from .forms import PostForm, CommentForm
 from .models import Post, Comment
 
+
+def dashboard(request):
+    template_name = 'dashboard.html'
+    context = {}
+    return render(request, template_name, context)
+
 #Post CRUD
 def CreatePostView(request):
     form = PostForm()

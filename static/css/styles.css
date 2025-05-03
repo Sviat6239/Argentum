@@ -1,0 +1,452 @@
+:root {
+    --bg-color: #f9f5ec;
+    --text-color: #003466;
+    --accent1: #3ba790;
+    --accent2: #f0cca8;
+    --jumbotron-bg: #ffffff;
+    --button-bg: #007bff;
+    --button-text: #ffffff;
+    --toggler-icon-bg: #007bff;
+}
+
+.dark-mode {
+    --bg-color: #001f3e;
+    --text-color: #f5f5dd;
+    --accent1: #397768;
+    --accent2: #24302e;
+    --jumbotron-bg: #24302e;
+    --button-bg: #0056b3;
+    --button-text: #f5f5dd;
+    --toggler-icon-bg: #f5f5dd;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+body {
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar {
+    background-color: var(--accent2) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-theme {
+    background-color: var(--accent1);
+    border: none;
+    color: var(--text-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-theme:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+a,
+.nav-link,
+.navbar-brand {
+    color: var(--text-color) !important;
+}
+
+.container {
+    flex: 1;
+    background-color: var(--bg-color) !important;
+    color: var(--text-color) !important;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.footer {
+    background-color: var(--accent1) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: auto;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.jumbotron {
+    background-color: var(--jumbotron-bg) !important;
+    color: var(--text-color) !important;
+    transition: background-color 0.3s, color 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-outline-primary {
+    background-color: var(--button-bg) !important;
+    color: var(--button-text) !important;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-outline-primary:hover {
+    background-color: var(--button-bg) !important;
+    opacity: 0.8;
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='var(--toggler-icon-bg)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+.animated-button {
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.animated-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: width 0.3s, height 0.3s;
+}
+
+.animated-button:hover::before {
+    width: 0;
+    height: 0;
+}
+
+.animated-button:hover {
+    background-color: var(--button-bg);
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.animated-button.hovered {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.flash-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #397768;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: none;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.flash-message.show {
+    display: block;
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.fade-in {
+    opacity: 0;
+    transition: opacity 2s;
+}
+
+.fade-in.visible {
+    opacity: 1;
+}
+
+/* Smooth scrolling behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Back-to-top button styles */
+#back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+#back-to-top.show {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+}
+
+#back-to-top:hover {
+    transform: scale(1.1);
+}
+
+.text-block,
+.value-item {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
+    cursor: pointer;
+    margin-bottom: 20px;
+    padding: 20px;
+    background-color: var(--jumbotron-bg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    border-radius: 10px;
+}
+
+.text-block:hover,
+.value-item:hover {
+    transform: scale(1.05) translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    background-color: var(--accent2);
+}
+
+.text-block.full-content {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1.2);
+    z-index: 1000;
+    width: 80%;
+    height: auto;
+    background-color: var(--bg-color);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    padding: 40px;
+    border-radius: 20px;
+    transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s, color 0.3s;
+}
+
+.dark-mode .text-block,
+.dark-mode .value-item {
+    background-color: var(--accent2);
+    color: var(--text-color);
+}
+
+.dark-mode .text-block:hover,
+.dark-mode .value-item:hover {
+    background-color: var(--accent1);
+    transform: scale(1.05) translateY(-10px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .card {
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add animations for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeInUp 0.5s ease-in-out;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Add animations for buttons */
+.animated-button {
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.animated-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: width 0.3s, height 0.3s;
+}
+
+.animated-button:hover::before {
+    width: 0;
+    height: 0;
+}
+
+.animated-button:hover {
+    background-color: var(--button-bg);
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+form input[type="text"],
+form input[type="password"] {
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 15px;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+form input[type="text"]:focus,
+form input[type="password"]:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 10px rgba(0, 86, 179, 0.5);
+}
+
+.card-header {
+    background-color: var(--accent1);
+    color: var(--text-color);
+    border-bottom: 2px solid #007bff;
+}
+
+.card-body {
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: var(--button-bg);
+    opacity: 0.8;
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.animated-button {
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.animated-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: width 0.3s, height 0.3s;
+}
+
+.filter-btn,
+.platform-btn {
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.filter-btn:hover,
+.platform-btn:hover {
+    transform: scale(1.1);
+    background-color: #0056b3;
+}
+
+/* New styles for social media section */
+.socialmedia-container {
+    margin-top: 50px;
+}
+
+.socialmedia-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.socialmedia-btn-group .btn {
+    margin: 0 5px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.socialmedia-btn-group .btn:hover {
+    transform: scale(1.1);
+    background-color: #0056b3;
+}
+
+.socialmedia-card {
+    animation: fadeInUp 0.5s ease-in-out;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.socialmedia-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.socialmedia-card img {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.socialmedia-card-body {
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
+    padding: 20px;
+}
+
+.socialmedia-platform-btn {
+    display: block;
+    margin: 20px auto;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.socialmedia-platform-btn:hover {
+    transform: scale(1.1);
+    background-color: #0056b3;
+}
+
+.highlight-border {
+    border: 2px solid #ff5733;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
