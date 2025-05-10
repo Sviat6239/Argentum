@@ -1,7 +1,7 @@
 from django.contrib.auth import login, logout, authenticate
 from django.shortcuts import render, redirect
 from .forms import UserRegisterForm, CustomLoginForm
-from models import CustomUser
+from .models import CustomUser
 
 def register_view(request):
     if request.method == 'POST':

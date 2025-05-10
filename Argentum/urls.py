@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from autentification.views import login_view, logout_view, register_view
 from blog.views import (
     dashboard, create_post_view, show_post_view, update_post_view, delete_post_view,
     create_comment_view, show_comment_view, update_comment_view, delete_comment_view,
@@ -23,9 +24,16 @@ from blog.views import (
 
 )
 
+from Argentum.views import index
+
 urlpatterns = [
+
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+    path('register/', register_view, name='register'),
+
     path('admin/', admin.site.urls),
-    path('', dashboard, name='index'),  # Homepage redirects to dashboard
+    path('', index, name='index'),  
     path('dashboard/', dashboard, name='dashboard'),
     # Post URLs
     path('posts/create/', create_post_view, name='create_post'),
