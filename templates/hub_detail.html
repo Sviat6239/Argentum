@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{{ hub.name }}</h1>
+  <p>{{ hub.description }}</p>
+
+  <hr>
+  <h2>Posts in this hub</h2>
+  <ul>
+    {% for post in posts %}
+      <li><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a> — {{ post.author.username }}</li>
+    {% empty %}
+      <li>No posts yet.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

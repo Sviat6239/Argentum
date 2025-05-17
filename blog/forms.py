@@ -25,15 +25,16 @@ class PostForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['post', 'content']
+        fields = [#'post',
+                   'content']
 
         labels = {
-            'post': 'Post',
+            #'post': 'Post',
             'content': 'Content',
         }
 
         widgets = {
-            'post': forms.Select(),
+            #'post': forms.Select(),
             'content': forms.Textarea(attrs={'placeholder': 'e.g. Nice post!'}),
         }
 
