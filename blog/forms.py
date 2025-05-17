@@ -1,97 +1,80 @@
 from django import forms
-from .models import Post, Comment, Hub, Tag, Category
+from .models import Post, Comment, Hub, Category, Tag
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['hub', 'category', 'tag','title', 'content', 'author', 'created_at']
+        fields = ['hub', 'category', 'tags', 'title', 'content']
 
         labels = {
             'hub': 'Hub',
             'category': 'Category',
-            'tag': 'Tag',
+            'tags': 'Tags',
             'title': 'Title',
-            'content':'Content',
-            'author': 'Author',
-            'created_at':'Created At'
+            'content': 'Content',
         }
 
         widgets = {
             'hub': forms.Select(),
             'category': forms.Select(),
-            'tag': forms.Select(),
-            'title' : forms.TextInput(attrs={'placeholder': 'eg. A one day...'}),
-            'content' : forms.Textarea(attrs={'placeholder': 'eg. I saw a black cat...'}),
-            'author': forms.Select(),
-            'created_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'readonly': True}),
-
+            'tags': forms.SelectMultiple(),
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. A one day...'}),
+            'content': forms.Textarea(attrs={'placeholder': 'e.g. I saw a black cat...'}),
         }
 
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['post','content', 'author', 'created_at']
+        fields = [#'post',
+                   'content']
 
         labels = {
-            'post': 'Post', 
+            #'post': 'Post',
             'content': 'Content',
-            'author': 'Author', 
-            'created_at': 'Created At'
-        }        
+        }
 
-        widgwts = {
-            'post': forms.Select(),
-            'content':forms.Textarea(attrs={'Placeholder': 'eg. Nice post!'}),
-            'author': forms.Select(),
-            'created_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'readonly': True}),
+        widgets = {
+            #'post': forms.Select(),
+            'content': forms.Textarea(attrs={'placeholder': 'e.g. Nice post!'}),
         }
 
 class HubForm(forms.ModelForm):
     class Meta:
-        model = Hub  
-
-        fields = ['title', 'description', 'author', 'created_at']
+        model = Hub
+        fields = ['title', 'description']
 
         labels = {
             'title': 'Title',
             'description': 'Description',
-            'author': 'Author',
-            'created_at': 'Created At'
         }
 
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'eg. Nice hub!'}),
-            'description': forms.Textarea(attrs={'placeholder': 'eg. Join our hub'}),
-            'author': forms.Select(),
-            'created_at': forms.DateTimeInput(attrs={'type': 'datetime-local', 'readonly': True}),
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice hub!'}),
+            'description': forms.Textarea(attrs={'placeholder': 'e.g. Join our hub'}),
         }
 
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-
         fields = ['title']
 
         labels = {
-            'title': 'Title'
+            'title': 'Title',
         }
 
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'eg. Nice category!'})
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice category!'}),
         }
 
 class TagForm(forms.ModelForm):
     class Meta:
-        models = Tag
-
-        fields = ['title'] 
+        model = Tag
+        fields = ['title']
 
         labels = {
-            'title': 'Title'
-        }       
-
-        widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'eg. Nice tag!'})
+            'title': 'Title',
         }
 
-      
+        widgets = {
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice tag!'}),
+        }
