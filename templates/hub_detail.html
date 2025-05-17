@@ -1,14 +1,25 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>{{ hub.name }}</h1>
+  <h1>{{ hub.title }}</h1>
   <p>{{ hub.description }}</p>
+  <div class="categories">
+    <strong>Categories:</strong>
+    {% for category in hub.categories.all %}
+      <span class="category-tag">{{ category.title }}</span>
+    {% empty %}
+      <span>No categories assigned.</span>
+    {% endfor %}
+  </div>
 
   <hr>
   <h2>Posts in this hub</h2>
   <ul>
     {% for post in posts %}
-      <li><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a> — {{ post.author.username }}</li>
+      <li>
+        <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a> — {{ post.author.username }}
+        <span class="vote-count"> ({{ post.vote_count }} votes)</span>
+      </li>
     {% empty %}
       <li>No posts yet.</li>
     {% endfor %}
