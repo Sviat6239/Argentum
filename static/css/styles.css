@@ -12,6 +12,12 @@
     --border-radius: 10px;
     --transition-speed: 0.3s;
     --highlight-color: #ff5733;
+    --upvote-bg: #28a745;
+    --downvote-bg: #dc3545;
+    --vote-count-bg: #e9ecef;
+    --vote-count-text: #495057;
+    --category-bg: #d1e7dd;
+    --category-text: #0f5132;
 }
 
 .dark-mode {
@@ -25,6 +31,12 @@
     --toggler-icon-bg: #d0d0d0;
     --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --upvote-bg: #218838;
+    --downvote-bg: #c82333;
+    --vote-count-bg: #343a40;
+    --vote-count-text: #ced4da;
+    --category-bg: #495057;
+    --category-text: #e9ecef;
 }
 
 html,
@@ -148,7 +160,7 @@ body {
     left: 50%;
     width: 300%;
     height: 300%;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(255, 255, 762, 0.15);
     transform: translate(-50%, -50%) rotate(45deg);
     transition: width var(--transition-speed), height var(--transition-speed);
 }
@@ -161,6 +173,63 @@ body {
 .animated-button:hover {
     transform: scale(1.05);
     box-shadow: var(--hover-shadow);
+}
+
+.animated-button.hovered {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.vote-controls {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.vote-controls .animated-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+.vote-controls .animated-button.upvote {
+    background-color: var(--upvote-bg);
+    color: var(--button-text);
+}
+
+.vote-controls .animated-button.downvote {
+    background-color: var(--downvote-bg);
+    color: var(--button-text);
+}
+
+.vote-controls .animated-button:hover {
+    opacity: 0.9;
+    transform: scale(1.05);
+    box-shadow: var(--hover-shadow);
+}
+
+.vote-count {
+    display: inline-block;
+    background-color: var(--vote-count-bg);
+    color: var(--vote-count-text);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-left: 10px;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.categories {
+    margin: 10px 0;
+}
+
+.category-tag {
+    display: inline-block;
+    background-color: var(--category-bg);
+    color: var(--category-text);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin: 0 5px;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
 .flash-message {

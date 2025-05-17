@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from autentification.views import login_view, logout_view, register_view
 from blog.views import (
     dashboard,
@@ -24,22 +24,9 @@ urlpatterns = [
     # User dashboard
     path('dashboard/', dashboard, name='dashboard'),
 
+    # Success page
     path('success/', index, name='success'),
 
-    # Posts
-    path('posts/create/', create_post_view, name='create_post'),
-    path('posts/<int:post_id>/', post_detail_view, name='post_detail'),
-    path('posts/update/<int:post_id>/', update_post_view, name='update_post'),
-    path('posts/delete/<int:post_id>/', delete_post_view, name='delete_post'),
-
-    # Comments
-    path('comments/create/<int:post_id>/', create_comment_view, name='create_comment'),
-    path('comments/update/<int:comment_id>/', update_comment_view, name='update_comment'),
-    path('comments/delete/<int:comment_id>/', delete_comment_view, name='delete_comment'),
-
-    # Hubs
-    path('hubs/create/', create_hub_view, name='create_hub'),
-    path('hubs/<int:hub_id>/', hub_detail_view, name='hub_detail'),
-    path('hubs/update/<int:hub_id>/', update_hub_view, name='update_hub'),
-    path('hubs/delete/<int:hub_id>/', delete_hub_view, name='delete_hub'),
+    # Blog app URLs (includes posts, comments, hubs, and voting)
+    path('', include('blog.urls')),
 ]

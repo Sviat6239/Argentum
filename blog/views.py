@@ -1,8 +1,9 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
+from django.contrib.contenttypes.models import ContentType
 from .forms import PostForm, CommentForm, HubForm
-from .models import Post, Comment, Hub
+from .models import Post, Comment, Hub, Vote
 
 def success_view(request):
     return render(request, 'success.html')
@@ -27,6 +28,7 @@ def create_post_view(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
+            form.save_m2m()  
             return redirect('success')  
     return render(request, 'create_post.html', {'form': form})
 
@@ -58,7 +60,6 @@ def post_detail_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comments = Comment.objects.filter(post=post).order_by('-created_at')
     new_comment = None
-
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -69,7 +70,6 @@ def post_detail_view(request, post_id):
             return redirect('post_detail', post_id=post.id)
     else:
         form = CommentForm()
-
     context = {
         'post': post,
         'comments': comments,
@@ -126,6 +126,7 @@ def create_hub_view(request):
             hub = form.save(commit=False)
             hub.author = request.user
             hub.save()
+            form.save_m2m()  
             return redirect('success')
     return render(request, 'create_hub.html', {'form': form})
 
@@ -156,9 +157,39 @@ def delete_hub_view(request, hub_id):
 def hub_detail_view(request, hub_id):
     hub = get_object_or_404(Hub, id=hub_id)
     posts = Post.objects.filter(hub=hub).order_by('-created_at')
-
     context = {
         'hub': hub,
         'posts': posts
     }
     return render(request, 'hub_detail.html', context)
+
+# Voting Views
+@login_required
+def upvote_view(request, content_type, object_id):
+    content_type_obj = get_object_or_404(ContentType, model=content_type)
+    obj = get_object_or_404(content_type_obj.model_class(), id=object_id)
+    vote, created = Vote.objects.get_or_create(
+        user=request.user,
+        content_type=content_type_obj,
+        object_id=object_id,
+        defaults={'value': 1}
+    )
+    if not created and vote.value != 1:
+        vote.value = 1
+        vote.save()
+    return redirect(request.META.get('HTTP_REFERER', 'post_detail'))
+
+@login_required
+def downvote_view(request, content_type, object_id):
+    content_type_obj = get_object_or_404(ContentType, model=content_type)
+    obj = get_object_or_404(content_type_obj.model_class(), id=object_id)
+    vote, created = Vote.objects.get_or_create(
+        user=request.user,
+        content_type=content_type_obj,
+        object_id=object_id,
+        defaults={'value': -1}
+    )
+    if not created and vote.value != -1:
+        vote.value = -1
+        vote.save()
+    return redirect(request.META.get('HTTP_REFERER', 'post_detail'))

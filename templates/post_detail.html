@@ -4,12 +4,34 @@
   <h1>{{ post.title }}</h1>
   <p>Author: {{ post.author.username }}</p>
   <p>{{ post.content }}</p>
+  <div class="vote-controls">
+    <form method="post" action="{% url 'upvote' content_type='post' object_id=post.id %}">
+      {% csrf_token %}
+      <button type="submit" class="animated-button">Upvote ({{ post.vote_count }})</button>
+    </form>
+    <form method="post" action="{% url 'downvote' content_type='post' object_id=post.id %}">
+      {% csrf_token %}
+      <button type="submit" class="animated-button">Downvote</button>
+    </form>
+  </div>
 
   <hr>
   <h2>Comments</h2>
   <ul>
     {% for comment in comments %}
-      <li><strong>{{ comment.author.username }}:</strong> {{ comment.content }}</li>
+      <li>
+        <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
+        <div class="vote-controls">
+          <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
+            {% csrf_token %}
+            <button type="submit" class="animated-button">Upvote ({{ comment.vote_count }})</button>
+          </form>
+          <form method="post" action="{% url 'downvote' content_type='comment' object_id=comment.id %}">
+            {% csrf_token %}
+            <button type="submit" class="animated-button">Downvote</button>
+          </form>
+        </div>
+      </li>
     {% empty %}
       <li>No comments yet.</li>
     {% endfor %}
@@ -20,6 +42,6 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Submit</button>
+    <button type="submit" class="animated-button">Submit</button>
   </form>
 {% endblock %}
