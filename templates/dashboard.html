@@ -3,9 +3,30 @@
 {% block content %}
   <h1>Dashboard</h1>
 
-  <div style="margin-bottom: 20px;">
-    <a href="{% url 'create_post' %}"><button>Create Post</button></a>
-    <a href="{% url 'create_hub' %}"><button>Create Hub</button></a>
+  <!-- Profile Section -->
+  <h2>My Profile</h2>
+  <div class="profile-section" style="margin-bottom: 20px;">
+    <p><strong>Display Name:</strong> {{ user.userprofile.name|default:user.username }}</p>
+    <p><strong>First Name:</strong> {{ user.first_name|default:"Not set" }}</p>
+    <p><strong>Last Name:</strong> {{ user.last_name|default:"Not set" }}</p>
+    <p><strong>Bio:</strong> {{ user.bio|default:"Not set" }}</p>
+    <p><strong>Profile Picture:</strong> {% if user.profile_picture %}<img src="{{ user.profile_picture.url }}" alt="Profile Picture" style="max-width: 100px;">{% else %}None{% endif %}</p>
+    <p><strong>Associated Post:</strong> {% if user.userprofile.post %}{{ user.userprofile.post.title }}{% else %}None{% endif %}</p>
+    <p><strong>Associated Comment:</strong> {% if user.userprofile.comment %}{{ user.userprofile.comment.content|truncatewords:10 }}{% else %}None{% endif %}</p>
+    <p><strong>Associated Hub:</strong> {% if user.userprofile.hub %}{{ user.userprofile.hub.title }}{% else %}None{% endif %}</p>
+    <a href="{% url 'edit_profile' %}" class="animated-button">Edit Profile</a>
+  </div>
+
+  <div class="dashboard-stats">
+    <p><strong>Posts Created:</strong> <span class="stat-count">{{ post_count }}</span></p>
+    <p><strong>Hubs Created:</strong> <span class="stat-count">{{ hub_count }}</span></p>
+    <p><strong>Total Upvotes:</strong> <span class="vote-count">{{ upvotes }}</span></p>
+    <p><strong>Total Downvotes:</strong> <span class="vote-count">{{ downvotes }}</span></p>
+  </div>
+
+  <div class="action-buttons" style="margin-bottom: 20px;">
+    <a href="{% url 'create_post' %}"><button class="animated-button">Create Post</button></a>
+    <a href="{% url 'create_hub' %}"><button class="animated-button">Create Hub</button></a>
   </div>
 
   <h2>My Posts</h2>

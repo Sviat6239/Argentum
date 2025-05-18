@@ -67,9 +67,31 @@ class Post(models.Model):
         verbose_name_plural = "Posts"
         ordering = ['-created_at', 'title']
 
+class Discussion(models.Model):
+    id = models.AutoField(primary_key=True, auto_created=True)
+    hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='discussions')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='discussions')
+    tags = models.ManyToManyField(Tag, related_name='discussions')
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='discussions')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    related_content = GenericForeignKey('content_type', 'object_id')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-created_at']        
+
 class Comment(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
+    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
+    discussion = models.ForeignKey(Discussion, on_delete=models.CASCADE, null=True, blank=True, related_name='comments')
     content = models.TextField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
     created_at = models.DateTimeField(default=timezone.now)
@@ -106,6 +128,14 @@ class Vote(models.Model):
 
     def __str__(self):
         return f"{self.user.username} {self.get_value_display()} on {self.content_object}"
+    
+class UserProfile(models.Model):
+    id = models.AutoField(primary_key=True, auto_created=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='userprofile')
+    name = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return self.name or self.user.username
 
 # Other models remain unchanged
 class Media(models.Model):
