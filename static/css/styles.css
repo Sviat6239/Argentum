@@ -18,6 +18,8 @@
     --vote-count-text: #495057;
     --category-bg: #d1e7dd;
     --category-text: #0f5132;
+    --stat-count-bg: #f8f9fa;
+    --stat-count-text: #212529;
 }
 
 .dark-mode {
@@ -37,6 +39,8 @@
     --vote-count-text: #ced4da;
     --category-bg: #495057;
     --category-text: #e9ecef;
+    --stat-count-bg: #495057;
+    --stat-count-text: #e9ecef;
 }
 
 html,
@@ -50,13 +54,13 @@ body {
 }
 
 body {
-    background-color: var(--bg-color) !important;
-    color: var(--text-color) !important;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     transition: background-color var(--transition-speed), color var(--transition-speed);
 }
 
 .navbar {
-    background-color: var(--accent2) !important;
+    background-color: var(--accent2);
     box-shadow: var(--primary-shadow);
     padding: 15px 20px;
 }
@@ -72,7 +76,7 @@ body {
 }
 
 .nav-link:hover {
-    color: var(--highlight-color) !important;
+    color: var(--highlight-color);
 }
 
 .btn-theme {
@@ -93,8 +97,8 @@ body {
 
 .container {
     flex: 1;
-    background-color: var(--bg-color) !important;
-    color: var(--text-color) !important;
+    background-color: var(--bg-color);
+    color: var(--text-color);
     padding: 30px;
     border-radius: var(--border-radius);
     box-shadow: var(--primary-shadow);
@@ -103,8 +107,8 @@ body {
 }
 
 .footer {
-    background-color: var(--accent1) !important;
-    color: var(--text-color) !important;
+    background-color: var(--accent1);
+    color: var(--text-color);
     box-shadow: 0 -4px 8px rgba(0, 0, 0, 0.1);
     margin-top: auto;
     padding: 20px 0;
@@ -113,8 +117,8 @@ body {
 }
 
 .jumbotron {
-    background-color: var(--jumbotron-bg) !important;
-    color: var(--text-color) !important;
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
     padding: 40px;
     border-radius: var(--border-radius);
     box-shadow: var(--primary-shadow);
@@ -123,9 +127,10 @@ body {
 
 .btn-primary,
 .btn-secondary,
-.btn-outline-primary {
-    background-color: var(--button-bg) !important;
-    color: var(--button-text) !important;
+.btn-outline-primary,
+.animated-button {
+    background-color: var(--button-bg);
+    color: var(--button-text);
     border: none;
     padding: 10px 20px;
     border-radius: var(--border-radius);
@@ -135,7 +140,8 @@ body {
 
 .btn-primary:hover,
 .btn-secondary:hover,
-.btn-outline-primary:hover {
+.btn-outline-primary:hover,
+.animated-button:hover {
     opacity: 0.9;
     transform: scale(1.05);
     box-shadow: var(--hover-shadow);
@@ -148,9 +154,6 @@ body {
 .animated-button {
     position: relative;
     overflow: hidden;
-    border-radius: var(--border-radius);
-    box-shadow: var(--primary-shadow);
-    transition: transform var(--transition-speed), box-shadow var(--transition-speed), background-color var(--transition-speed);
 }
 
 .animated-button::before {
@@ -160,7 +163,7 @@ body {
     left: 50%;
     width: 300%;
     height: 300%;
-    background-color: rgba(255, 255, 762, 0.15);
+    background-color: rgba(255, 255, 255, 0.15);
     transform: translate(-50%, -50%) rotate(45deg);
     transition: width var(--transition-speed), height var(--transition-speed);
 }
@@ -168,11 +171,6 @@ body {
 .animated-button:hover::before {
     width: 0;
     height: 0;
-}
-
-.animated-button:hover {
-    transform: scale(1.05);
-    box-shadow: var(--hover-shadow);
 }
 
 .animated-button.hovered {
@@ -200,12 +198,6 @@ body {
     color: var(--button-text);
 }
 
-.vote-controls .animated-button:hover {
-    opacity: 0.9;
-    transform: scale(1.05);
-    box-shadow: var(--hover-shadow);
-}
-
 .vote-count {
     display: inline-block;
     background-color: var(--vote-count-bg);
@@ -230,6 +222,98 @@ body {
     font-size: 0.85rem;
     margin: 0 5px;
     transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.dashboard-stats {
+    background-color: var(--jumbotron-bg);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--primary-shadow);
+    margin-bottom: 20px;
+}
+
+.dashboard-stats p {
+    margin: 5px 0;
+    font-size: 1rem;
+}
+
+.stat-count {
+    display: inline-block;
+    background-color: var(--stat-count-bg);
+    color: var(--stat-count-text);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-left: 5px;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.profile-section {
+    background-color: var(--jumbotron-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--primary-shadow);
+    margin-bottom: 20px;
+    transition: background-color var(--transition-speed);
+}
+
+.profile-section p {
+    margin: 8px 0;
+    font-size: 1rem;
+}
+
+.profile-section img {
+    border-radius: var(--border-radius);
+    margin-top: 5px;
+    object-fit: cover;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select,
+.form-group input[type="file"] {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    border: 2px solid var(--button-bg);
+    border-radius: var(--border-radius);
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
+    box-shadow: var(--primary-shadow);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+.form-group input[type="file"]:focus {
+    border-color: var(--highlight-color);
+    box-shadow: 0 0 12px rgba(255, 87, 51, 0.5);
+    outline: none;
+}
+
+#profile-form {
+    background-color: var(--jumbotron-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--primary-shadow);
+    transition: background-color var(--transition-speed);
 }
 
 .flash-message {
@@ -367,7 +451,7 @@ body {
 
 form input[type="text"],
 form input[type="password"] {
-    border: 2px solid #007bff;
+    border: 2px solid var(--button-bg);
     border-radius: var(--border-radius);
     padding: 12px;
     width: 100%;
@@ -378,15 +462,15 @@ form input[type="password"] {
 
 form input[type="text"]:focus,
 form input[type="password"]:focus {
-    border-color: #0056b3;
-    box-shadow: 0 0 12px rgba(0, 86, 179, 0.5);
+    border-color: var(--highlight-color);
+    box-shadow: 0 0 12px rgba(255, 87, 51, 0.5);
     outline: none;
 }
 
 .card-header {
     background-color: var(--accent1);
     color: var(--text-color);
-    border-bottom: 2px solid #007bff;
+    border-bottom: 2px solid var(--highlight-color);
     padding: 15px;
     border-radius: var(--border-radius) var(--border-radius) 0 0;
 }
@@ -420,7 +504,7 @@ form input[type="password"]:focus {
 
 .socialmedia-btn-group .btn:hover {
     transform: scale(1.1);
-    background-color: #0056b3;
+    background-color: var(--highlight-color);
 }
 
 .socialmedia-card {
@@ -460,7 +544,7 @@ form input[type="password"]:focus {
 
 .socialmedia-platform-btn:hover {
     transform: scale(1.1);
-    background-color: #0056b3;
+    background-color: var(--highlight-color);
 }
 
 .highlight-border {
@@ -470,7 +554,6 @@ form input[type="password"]:focus {
     box-shadow: var(--primary-shadow);
 }
 
-/* New Additions for More Depth */
 .modal {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -509,13 +592,13 @@ form input[type="password"]:focus {
 }
 
 .alert-success {
-    background-color: #28a745;
-    color: white;
+    background-color: var(--upvote-bg);
+    color: var(--button-text);
 }
 
 .alert-danger {
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--downvote-bg);
+    color: var(--button-text);
 }
 
 /* Responsive Design */
@@ -544,8 +627,21 @@ form input[type="password"]:focus {
 
     .btn-theme,
     .btn-primary,
-    .socialmedia-platform-btn {
+    .socialmedia-platform-btn,
+    .animated-button {
         padding: 8px 16px;
+    }
+
+    .profile-section,
+    #profile-form {
+        padding: 15px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select,
+    .form-group input[type="file"] {
+        max-width: 100%;
     }
 }
 

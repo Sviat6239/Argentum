@@ -195,6 +195,16 @@ def downvote_view(request, content_type, object_id):
         vote.save()
     return redirect(request.META.get('HTTP_REFERER', 'post_detail'))
 
+def get_post_votes(post):
+    upvotes = post.votes.filter(value=1).count()
+    downvotes = post.votes.filter(value=-1).count()
+    return upvotes, downvotes
+
+def get_hub_total_votes(hub):
+    from django.db.models import Sum
+    agg = hub.posts.aggregate(total=Sum('votes__value'))
+    return agg['total'] or 0
+
 def recent_activity_view(request):
     last_hubs = Hub.objects.order_by('-created_at')[:5]
     
@@ -204,4 +214,3 @@ def recent_activity_view(request):
         'posts': posts,
         'hubs': last_hubs,
     }
-    return render(request, 'recent_activity.html', context)
