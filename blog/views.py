@@ -2,10 +2,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.contenttypes.models import ContentType
-from .forms import PostForm, CommentForm, HubForm, DiscussionForm
-from .models import Post, Comment, Hub, Vote, Discussion
-from Argentum.models import UserProfile
-from Argentum.forms import UserProfileForm
+from .forms import PostForm, CommentForm, HubForm
+from .models import Post, Comment, Hub, Vote
+from itertools import chain
 
 def success_view(request):
     return render(request, 'success.html')
@@ -14,37 +13,13 @@ def success_view(request):
 def dashboard(request):
     user_posts = Post.objects.filter(author=request.user)
     user_hubs = Hub.objects.filter(author=request.user)
-    
-    post_count = user_posts.count()
-    hub_count = user_hubs.count()
-    
-    post_content_type = ContentType.objects.get_for_model(Post)
-    comment_content_type = ContentType.objects.get_for_model(Comment)
-    
-    upvotes = Vote.objects.filter(
-        user=request.user,
-        value=1,
-        content_type__in=[post_content_type, comment_content_type],
-        object_id__in=list(user_posts.values_list('id', flat=True)) + list(Comment.objects.filter(author=request.user).values_list('id', flat=True))
-    ).count()
-    
-    downvotes = Vote.objects.filter(
-        user=request.user,
-        value=-1,
-        content_type__in=[post_content_type, comment_content_type],
-        object_id__in=list(user_posts.values_list('id', flat=True)) + list(Comment.objects.filter(author=request.user).values_list('id', flat=True))
-    ).count()
-
     context = {
         'user_posts': user_posts,
         'user_hubs': user_hubs,
-        'post_count': post_count,
-        'hub_count': hub_count,
-        'upvotes': upvotes,
-        'downvotes': downvotes,
     }
     return render(request, 'dashboard.html', context)
 
+# Post CRUD
 @login_required
 def create_post_view(request):
     form = PostForm()
@@ -54,7 +29,7 @@ def create_post_view(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-            form.save_m2m() 
+            form.save_m2m()  
             return redirect('success')  
     return render(request, 'create_post.html', {'form': form})
 
@@ -81,6 +56,7 @@ def delete_post_view(request, post_id):
         return redirect('success')
     return render(request, 'confirm_action.html', {'obj': post})
 
+@login_required
 def post_detail_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     comments = Comment.objects.filter(post=post).order_by('-created_at')
@@ -151,7 +127,7 @@ def create_hub_view(request):
             hub = form.save(commit=False)
             hub.author = request.user
             hub.save()
-            form.save_m2m()
+            form.save_m2m()  
             return redirect('success')
     return render(request, 'create_hub.html', {'form': form})
 
@@ -178,7 +154,7 @@ def delete_hub_view(request, hub_id):
         return redirect('success')
     return render(request, 'confirm_action.html', {'obj': hub})
 
-
+@login_required
 def hub_detail_view(request, hub_id):
     hub = get_object_or_404(Hub, id=hub_id)
     posts = Post.objects.filter(hub=hub).order_by('-created_at')
@@ -188,56 +164,6 @@ def hub_detail_view(request, hub_id):
     }
     return render(request, 'hub_detail.html', context)
 
-# Discussion CRUD
-
-@login_required
-def create_discussion_view(request, hub_id):
-    hub = get_object_or_404(Hub, pk=hub_id)
-    if request.method == 'POST':
-        form = DiscussionForm(request.POST, user=request.user)
-        if form.is_valid():
-            discussion = form.save(commit=False)
-            discussion.author = request.user
-            discussion.hub = hub
-            discussion.save()
-            form.save_m2m()
-            return redirect('discussion_detail', discussion_id=discussion.id)
-    else:
-        form = DiscussionForm(user=request.user, initial={'hub': hub})
-    return render(request, 'create_discussion.html', {'form': form, 'hub': hub})
-
-@login_required
-def update_discussion_view(request, discussion_id):
-    discussion = get_object_or_404(Discussion, pk=discussion_id, author=request.user)
-    if request.method == 'POST':
-        form = DiscussionForm(request.POST, instance=discussion, user=request.user)
-        if form.is_valid():
-            discussion = form.save(commit=False)
-            discussion.save()
-            form.save_m2m()
-            return redirect('discussion_detail', discussion_id=discussion.id)
-    else:
-        form = DiscussionForm(instance=discussion, user=request.user)
-    return render(request, 'update_discussion.html', {'form': form, 'discussion': discussion})
-
-@login_required
-def delete_discussion_view(request, discussion_id):
-    discussion = get_object_or_404(Discussion, pk=discussion_id, author=request.user)
-    if request.method == 'POST':
-        discussion.delete()
-        return redirect('dashboard')
-    return render(request, 'delete_discussion.html', {'discussion': discussion})
-
-def discussion_detail_view(request, discussion_id):
-    discussion = get_object_or_404(Discussion, pk=discussion_id)
-    comments = discussion.comments.all()
-    comment_form = CommentForm() if request.user.is_authenticated else None
-    return render(request, 'discussion_detail.html', {
-        'discussion': discussion,
-        'comments': comments,
-        'is_author': request.user.is_authenticated and request.user == discussion.author,
-        'comment_form': comment_form,
-    })
 # Voting Views
 @login_required
 def upvote_view(request, content_type, object_id):
@@ -269,41 +195,23 @@ def downvote_view(request, content_type, object_id):
         vote.save()
     return redirect(request.META.get('HTTP_REFERER', 'post_detail'))
 
+def get_post_votes(post):
+    upvotes = post.votes.filter(value=1).count()
+    downvotes = post.votes.filter(value=-1).count()
+    return upvotes, downvotes
 
-@login_required
-def edit_profile(request):
-    try:
-        profile = request.user.userprofile
-    except UserProfile.DoesNotExist:
-        profile = UserProfile(user=request.user, name=request.user.username)
-        profile.save()
+def get_hub_total_votes(hub):
+    from django.db.models import Sum
+    agg = hub.posts.aggregate(total=Sum('votes__value'))
+    return agg['total'] or 0
 
-    if request.method == 'POST':
-        form = UserProfileForm(request.POST, request.FILES, instance=profile, user=request.user)
-        if form.is_valid():
-            form.save()
-            return redirect('dashboard')
-    else:
-        initial = {
-            'first_name': request.user.first_name,
-            'last_name': request.user.last_name,
-            'bio': request.user.bio,
-            'profile_picture': request.user.profile_picture,
-        }
-        form = UserProfileForm(instance=profile, user=request.user, initial=initial)
-
-    user_posts = Post.objects.filter(author=request.user)
-    user_hubs = Hub.objects.filter(author=request.user)
-    user_discussions = Discussion.objects.filter(author=request.user)
-
-    return render(request, 'dashboard.html', {
-        'form': form,
-        'post_count': user_posts.count(),
-        'hub_count': user_hubs.count(),
-        'discussion_count': user_discussions.count(),
-        'upvotes': sum(post.vote_count for post in user_posts) if user_posts else 0,
-        'downvotes': sum(1 for vote in Vote.objects.filter(content_type=ContentType.objects.get_for_model(Post), object_id__in=user_posts.values('id'), value=-1)) if user_posts else 0,
-        'user_posts': user_posts,
-        'user_hubs': user_hubs,
-        'user_discussions': user_discussions,
-    })
+def recent_activity_view(request):
+    last_hubs = Hub.objects.order_by('-created_at')[:5]
+    
+    posts = Post.objects.filter(hub__in=last_hubs).order_by('-created_at')[:20]
+    
+    context = {
+        'posts': posts,
+        'hubs': last_hubs,
+    }
+    return render(request, 'recent_activity.html', context)
