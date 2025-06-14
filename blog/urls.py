@@ -17,4 +17,5 @@ urlpatterns = [
     path('hub/<int:hub_id>/', views.hub_detail_view, name='hub_detail'),
     path('vote/<str:content_type>/<int:object_id>/upvote/', views.upvote_view, name='upvote'),
     path('vote/<str:content_type>/<int:object_id>/downvote/', views.downvote_view, name='downvote'),
+    path('recent/', views.recent_activity_view, name='recent_activity'),
 ]

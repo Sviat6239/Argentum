@@ -4,6 +4,7 @@ from django.http import HttpResponseForbidden
 from django.contrib.contenttypes.models import ContentType
 from .forms import PostForm, CommentForm, HubForm
 from .models import Post, Comment, Hub, Vote
+from itertools import chain
 
 def success_view(request):
     return render(request, 'success.html')
@@ -193,3 +194,14 @@ def downvote_view(request, content_type, object_id):
         vote.value = -1
         vote.save()
     return redirect(request.META.get('HTTP_REFERER', 'post_detail'))
+
+def recent_activity_view(request):
+    last_hubs = Hub.objects.order_by('-created_at')[:5]
+    
+    posts = Post.objects.filter(hub__in=last_hubs).order_by('-created_at')[:20]
+    
+    context = {
+        'posts': posts,
+        'hubs': last_hubs,
+    }
+    return render(request, 'recent_activity.html', context)
