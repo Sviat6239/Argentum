@@ -214,4 +214,3 @@ def recent_activity_view(request):
         'posts': posts,
         'hubs': last_hubs,
     }
-    return render(request, 'recent_activity.html', context)
