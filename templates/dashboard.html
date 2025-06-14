@@ -1,61 +1,65 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Dashboard</h1>
+<div class="container mt-5">
 
-  <!-- Profile Section -->
-  <h2>My Profile</h2>
-  <div class="profile-section" style="margin-bottom: 20px;">
-    <p><strong>Display Name:</strong> {{ user.userprofile.name|default:user.username }}</p>
-    <p><strong>First Name:</strong> {{ user.first_name|default:"Not set" }}</p>
-    <p><strong>Last Name:</strong> {{ user.last_name|default:"Not set" }}</p>
-    <p><strong>Bio:</strong> {{ user.bio|default:"Not set" }}</p>
-    <p><strong>Profile Picture:</strong> {% if user.profile_picture %}<img src="{{ user.profile_picture.url }}" alt="Profile Picture" style="max-width: 100px;">{% else %}None{% endif %}</p>
-    <p><strong>Associated Post:</strong> {% if user.userprofile.post %}{{ user.userprofile.post.title }}{% else %}None{% endif %}</p>
-    <p><strong>Associated Comment:</strong> {% if user.userprofile.comment %}{{ user.userprofile.comment.content|truncatewords:10 }}{% else %}None{% endif %}</p>
-    <p><strong>Associated Hub:</strong> {% if user.userprofile.hub %}{{ user.userprofile.hub.title }}{% else %}None{% endif %}</p>
-    <a href="{% url 'edit_profile' %}" class="animated-button">Edit Profile</a>
+  <div class="mb-4">
+    <a href="{% url 'create_post' %}" class="btn btn-primary me-2">Create Post</a>
+    <a href="{% url 'create_hub' %}" class="btn btn-secondary">Create Hub</a>
   </div>
 
-  <div class="dashboard-stats">
-    <p><strong>Posts Created:</strong> <span class="stat-count">{{ post_count }}</span></p>
-    <p><strong>Hubs Created:</strong> <span class="stat-count">{{ hub_count }}</span></p>
-    <p><strong>Total Upvotes:</strong> <span class="vote-count">{{ upvotes }}</span></p>
-    <p><strong>Total Downvotes:</strong> <span class="vote-count">{{ downvotes }}</span></p>
-  </div>
-
-  <div class="action-buttons" style="margin-bottom: 20px;">
-    <a href="{% url 'create_post' %}"><button class="animated-button">Create Post</button></a>
-    <a href="{% url 'create_hub' %}"><button class="animated-button">Create Hub</button></a>
-  </div>
-
-  <h2>My Posts</h2>
-  {% if user_posts %}
-    <ul>
+  <div class="mb-5">
+    <h2 class="mb-3">My Posts</h2>
+    {% if user_posts %}
+    <ul class="list-group shadow-sm">
       {% for post in user_posts %}
-        <li>
-          <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-          (<a href="{% url 'update_post' post.id %}">Edit</a> |
-           <a href="{% url 'delete_post' post.id %}">Delete</a>)
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>You haven't created any posts yet.</p>
-  {% endif %}
+      <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <a href="{% url 'post_detail' post.id %}" class="text-decoration-none">{{ post.title }}</a>
+          <br>
+          <small class="text-muted">
+            by {{ post.author.username|default:'Unknown' }} on {{ post.created_at|date:"Y-m-d H:i" }}
+          </small>
+        </div>
 
-  <h2>My Hubs</h2>
-  {% if user_hubs %}
-    <ul>
-      {% for hub in user_hubs %}
-        <li>
-          <a href="{% url 'hub_detail' hub.id %}">{{ hub.title }}</a>
-          (<a href="{% url 'update_hub' hub.id %}">Edit</a> |
-           <a href="{% url 'delete_hub' hub.id %}">Delete</a>)
-        </li>
+        <div class="d-flex align-items-center gap-3 mt-2 mt-sm-0">
+          <span>👍 {{ post.get_votes_counts.0 }} 👎 {{ post.get_votes_counts.1 }}</span>
+          <a href="{% url 'update_post' post.id %}" class="btn btn-sm btn-warning">Edit</a>
+          <a href="{% url 'delete_post' post.id %}" class="btn btn-sm btn-danger">Delete</a>
+        </div>
+      </li>
       {% endfor %}
     </ul>
-  {% else %}
-    <p>You haven't created any hubs yet.</p>
-  {% endif %}
+    {% else %}
+    <div class="alert alert-info">You haven't created any posts yet.</div>
+    {% endif %}
+  </div>
+
+  <div>
+    <h2 class="mb-3">My Hubs</h2>
+    {% if user_hubs %}
+    <ul class="list-group shadow-sm">
+      {% for hub in user_hubs %}
+      <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <a href="{% url 'hub_detail' hub.id %}" class="text-decoration-none">{{ hub.title }}</a>
+          <br>
+          <small class="text-muted">
+            by {{ hub.author.username|default:'Unknown' }} on {{ hub.created_at|date:"Y-m-d H:i" }}
+          </small>
+        </div>
+
+        <div class="d-flex align-items-center gap-3 mt-2 mt-sm-0">
+          <span>Total votes: {{ hub.get_total_votes }}</span>
+          <a href="{% url 'update_hub' hub.id %}" class="btn btn-sm btn-warning">Edit</a>
+          <a href="{% url 'delete_hub' hub.id %}" class="btn btn-sm btn-danger">Delete</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="alert alert-info">You haven't created any hubs yet.</div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
