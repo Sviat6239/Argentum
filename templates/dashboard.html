@@ -1,40 +1,68 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Dashboard</h1>
+<div class="container mt-5">
+  <h1 class="mb-4">Dashboard</h1>
 
-  <div style="margin-bottom: 20px;">
-    <a href="{% url 'create_post' %}"><button>Create Post</button></a>
-    <a href="{% url 'create_hub' %}"><button>Create Hub</button></a>
+  <div class="mb-4">
+    <a href="{% url 'create_post' %}" class="btn btn-primary me-2">
+      Create Post
+    </a>
+    <a href="{% url 'create_hub' %}" class="btn btn-secondary">
+      Create Hub
+    </a>
   </div>
 
-  <h2>My Posts</h2>
-  {% if user_posts %}
-    <ul>
+  <div class="mb-5">
+    <h2 class="mb-3">My Posts</h2>
+    {% if user_posts %}
+    <ul class="list-group shadow-sm">
       {% for post in user_posts %}
-        <li>
-          <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
-          (<a href="{% url 'update_post' post.id %}">Edit</a> |
-           <a href="{% url 'delete_post' post.id %}">Delete</a>)
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>You haven't created any posts yet.</p>
-  {% endif %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a class="text-decoration-none" href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
 
-  <h2>My Hubs</h2>
-  {% if user_hubs %}
-    <ul>
-      {% for hub in user_hubs %}
-        <li>
-          <a href="{% url 'hub_detail' hub.id %}">{{ hub.title }}</a>
-          (<a href="{% url 'update_hub' hub.id %}">Edit</a> |
-           <a href="{% url 'delete_hub' hub.id %}">Delete</a>)
-        </li>
+        <span>
+          <a class="btn btn-sm btn-warning me-1" href="{% url 'update_post' post.id %}">
+            Edit
+          </a>
+          <a class="btn btn-sm btn-danger" href="{% url 'delete_post' post.id %}">
+            Delete
+          </a>
+        </span>
+      </li>
       {% endfor %}
     </ul>
-  {% else %}
-    <p>You haven't created any hubs yet.</p>
-  {% endif %}
+    {% else %}
+    <div class="alert alert-info">
+      You haven't created any posts yet.
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <h2 class="mb-3">My Hubs</h2>
+    {% if user_hubs %}
+    <ul class="list-group shadow-sm">
+      {% for hub in user_hubs %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <a class="text-decoration-none" href="{% url 'hub_detail' hub.id %}">{{ hub.title }}</a>
+
+        <span>
+          <a class="btn btn-sm btn-warning me-1" href="{% url 'update_hub' hub.id %}">
+            Edit
+          </a>
+          <a class="btn btn-sm btn-danger" href="{% url 'delete_hub' hub.id %}">
+            Delete
+          </a>
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="alert alert-info">
+      You haven't created any hubs yet.
+    </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
