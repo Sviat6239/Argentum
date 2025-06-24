@@ -1,39 +1,352 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+  :root {
+    --bg-color: #f4f4f7;
+    --text-color: #1e1e1e;
+    --accent1: #c0c0c0;
+    --accent2: #a6b0bb;
+    --jumbotron-bg: #ffffff;
+    --button-bg: #6c757d;
+    --button-text: #ffffff;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --border-radius: 10px;
+    --transition-speed: 0.3s;
+    --highlight-color: #ff5733;
+    --upvote-bg: #28a745;
+    --downvote-bg: #dc3545;
+  }
+
+  .dark-mode {
+    --bg-color: #1a1c1e;
+    --text-color: #e0e0e0;
+    --accent1: #9fa8b0;
+    --accent2: #5c6370;
+    --jumbotron-bg: #2b2e32;
+    --button-bg: #5a6268;
+    --button-text: #ffffff;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --upvote-bg: #218838;
+    --downvote-bg: #c82333;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+  }
+
+  .container {
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 1200px;
+    background-color: var(--bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--primary-shadow);
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-color);
+  }
+
+  p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: var(--accent1);
+    margin-bottom: 30px;
+  }
+
+  hr {
+    border: 0;
+    border-top: 2px solid var(--accent1);
+    margin: 30px 0;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 20px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  li:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+  }
+
+  ul ul li {
+    background-color: var(--accent2);
+    border-color: var(--accent1);
+    margin-left: 30px;
+    margin-top: 10px;
+    padding: 12px;
+  }
+
+  ul ul li:hover {
+    background-color: var(--accent1);
+  }
+
+  strong {
+    color: var(--text-color);
+    font-weight: 600;
+  }
+
+  .vote-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .animated-button {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed), background-color var(--transition-speed);
+  }
+
+  .animated-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: width var(--transition-speed), height var(--transition-speed);
+  }
+
+  .animated-button:hover::before {
+    width: 0;
+    height: 0;
+  }
+
+  .animated-button:hover {
+    transform: scale(1.05);
+    box-shadow: var(--hover-shadow);
+  }
+
+  .animated-button.upvote {
+    background-color: var(--upvote-bg);
+  }
+
+  .animated-button.upvote:hover {
+    background-color: #218838;
+  }
+
+  .animated-button.downvote {
+    background-color: var(--downvote-bg);
+  }
+
+  .animated-button.downvote:hover {
+    background-color: #c82333;
+  }
+
+  form#reply-form-{{ comment.id }} {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: var(--accent2);
+    border-radius: var(--border-radius);
+    display: none;
+  }
+
+  form#reply-form-{{ comment.id }} p {
+    margin-bottom: 10px;
+  }
+
+  form#reply-form-{{ comment.id }} input[type="text"],
+  form#reply-form-{{ comment.id }} textarea {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid var(--accent1);
+    border-radius: var(--border-radius);
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+  }
+
+  form#reply-form-{{ comment.id }} input[type="text"]:focus,
+  form#reply-form-{{ comment.id }} textarea:focus {
+    border-color: var(--highlight-color);
+    box-shadow: 0 0 6px rgba(255, 87, 51, 0.2);
+    outline: none;
+  }
+
+  form#reply-form-{{ comment.id }} .animated-button {
+    background-color: var(--button-bg);
+  }
+
+  form#reply-form-{{ comment.id }} .animated-button:hover {
+    background-color: var(--highlight-color);
+  }
+
+  form[method="post"] {
+    margin-top: 20px;
+  }
+
+  form[method="post"] p {
+    margin-bottom: 15px;
+  }
+
+  form[method="post"] input[type="text"],
+  form[method="post"] textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--accent1);
+    border-radius: var(--border-radius);
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+  }
+
+  form[method="post"] input[type="text"]:focus,
+  form[method="post"] textarea:focus {
+    border-color: var(--highlight-color);
+    box-shadow: 0 0 6px rgba(211, 45, 7, 0.2);
+    outline: none;
+  }
+
+  form[method="post"] .animated-button {
+    background-color: var(--button-bg);
+    padding: 10px 20px;
+  }
+
+  form[method="post"] .animated-button:hover {
+    background-color: var(--highlight-color);
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+      margin: 10px auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    li {
+      padding: 10px;
+    }
+  }
+</style>
+
+<div class="container">
   <h1>{{ post.title }}</h1>
   <p>Author: {{ post.author.username }}</p>
   <p>{{ post.content }}</p>
+
   <div class="vote-controls">
     <form method="post" action="{% url 'upvote' content_type='post' object_id=post.id %}">
       {% csrf_token %}
-      <button type="submit" class="animated-button">Upvote ({{ post.vote_count }})</button>
+      <button type="submit" class="animated-button upvote">
+        Upvote ({{ post.vote_count }})
+      </button>
     </form>
     <form method="post" action="{% url 'downvote' content_type='post' object_id=post.id %}">
       {% csrf_token %}
-      <button type="submit" class="animated-button">Downvote</button>
+      <button type="submit" class="animated-button downvote">
+        Downvote
+      </button>
     </form>
   </div>
 
   <hr>
   <h2>Comments</h2>
+
   <ul>
     {% for comment in comments %}
-      <li>
-        <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
-        <div class="vote-controls">
-          <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
-            {% csrf_token %}
-            <button type="submit" class="animated-button">Upvote ({{ comment.vote_count }})</button>
-          </form>
-          <form method="post" action="{% url 'downvote' content_type='comment' object_id=comment.id %}">
-            {% csrf_token %}
-            <button type="submit" class="animated-button">Downvote</button>
-          </form>
-        </div>
-      </li>
+    <li>
+      <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
+      <div class="vote-controls">
+        <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
+          {% csrf_token %}
+          <button type="submit" class="animated-button upvote">
+            Upvote ({{ comment.vote_count }})
+          </button>
+        </form>
+        <form method="post" action="{% url 'downvote' content_type='comment' object_id=comment.id %}">
+          {% csrf_token %}
+          <button type="submit" class="animated-button downvote">
+            Downvote
+          </button>
+        </form>
+        <button onclick="toggleReplyForm('{{ comment.id }}')" class="animated-button">
+          Reply
+        </button>
+
+        <form id="reply-form-{{ comment.id }}" method="post" style="display: none">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <input type="hidden" name="parent" value="{{ comment.id }}">
+          <button type="submit" class="animated-button">
+            Submit Reply
+          </button>
+        </form>
+      </div>
+
+      {% if comment.replies.all %}
+      <ul style="margin-left: 30px">
+        {% for reply in comment.replies.all %}
+        <li>
+          <strong>{{ reply.author.username }}:</strong> {{ reply.content }}
+          <div class="vote-controls">
+            <form method="post" action="{% url 'upvote' content_type='comment' object_id=reply.id %}">
+              {% csrf_token %}
+              <button type="submit" class="animated-button upvote">
+                Upvote ({{ reply.vote_count }})
+              </button>
+            </form>
+            <form method="post" action="{% url 'downvote' content_type='comment' object_id=reply.id %}">
+              {% csrf_token %}
+              <button type="submit" class="animated-button downvote">
+                Downvote
+              </button>
+            </form>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </li>
     {% empty %}
-      <li>No comments yet.</li>
+    <li>No comments yet.</li>
     {% endfor %}
   </ul>
 
@@ -42,6 +355,18 @@
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="animated-button">Submit</button>
+    <button type="submit" class="animated-button">
+      Submit
+    </button>
   </form>
+</div>
+
+<script>
+  function toggleReplyForm(commentId) {
+    const form = document.getElementById(`reply-form-${commentId}`);
+    if (form) {
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+</script>
 {% endblock %}

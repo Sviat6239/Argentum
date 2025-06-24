@@ -18,4 +18,12 @@ urlpatterns = [
     path('vote/<str:content_type>/<int:object_id>/upvote/', views.upvote_view, name='upvote'),
     path('vote/<str:content_type>/<int:object_id>/downvote/', views.downvote_view, name='downvote'),
     path('recent/', views.recent_activity_view, name='recent_activity'),
+    path('discussion/create/', views.create_discussion_view, name='create_discussion'),
+    path('discussion/<int:pk>/', views.discussion_detail_view, name='discussion_detail'),
+    path('discussion/<int:pk>/edit/', views.edit_discussion_view, name='edit_discussion'),
+    path('discussion/<int:pk>/delete/', views.delete_discussion_view, name='delete_discussion'),
+    path('hub/<int:hub_id>/', views.hub_detail_view, name='hub_detail'),
+    path('hub/<int:hub_id>/create_post/', views.create_post_view, name='create_post'),
+    path('hub/<int:hub_id>/create_discussion/', views.create_discussion_view, name='create_discussion'),
+
 ]

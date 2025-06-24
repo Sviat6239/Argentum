@@ -1,27 +1,276 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<style>
+  :root {
+    --primary-color: #4a90e2;
+    --secondary-color: #2d3748;
+    --text-color: #e2e8f0;
+    --accent-color: #ff6b6b;
+    --form-bg: #1a202c;
+    --input-bg: #2d3748;
+    --input-border: #4a5568;
+    --input-focus: #4a90e2;
+    --button-bg: #4a90e2;
+    --button-hover: #3b82f6;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+  }
+
+  body {
+    background-color: #1a202c;
+    color: var(--text-color);
+  }
+
+  .hub-header {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--secondary-color), #1a202c);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .hub-header h1 {
+    font-size: 2.25rem;
+    color: var(--text-color);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .hub-header p {
+    color: #a0aec0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+  }
+
+  .categories {
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .category-tag {
+    display: inline-flex;
+    align-items: center;
+    background: var(--secondary-color);
+    color: var(--text-color);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .category-tag:hover {
+    background: var(--primary-color);
+    color: #ffffff;
+    transform: translateY(-2px);
+  }
+
+  .section {
+    margin-top: 40px;
+    padding: 20px;
+    background: var(--form-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+  }
+
+  .section h2 {
+    font-size: 1.75rem;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  ul.post-list, ul.discussion-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  ul.post-list li, ul.discussion-list li {
+    padding: 15px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    margin-bottom: 12px;
+    background: var(--form-bg);
+    transition: var(--transition);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  ul.post-list li:hover, ul.discussion-list li:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-color);
+  }
+
+  ul.post-list li a, ul.discussion-list li a {
+    color: var(--text-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+
+  ul.post-list li a:hover, ul.discussion-list li a:hover {
+    color: var(--primary-color);
+  }
+
+  .vote-count {
+    font-weight: 600;
+    color: var(--accent-color);
+    background: var(--secondary-color);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+
+  form {
+    background: var(--form-bg);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    margin-top: 20px;
+    border: 1px solid var(--input-border);
+  }
+
+  form h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    color: var(--text-color);
+    font-weight: 600;
+  }
+
+  form input[type="text"],
+  form textarea,
+  form select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--input-border);
+    border-radius: var(--border-radius);
+    margin-bottom: 15px;
+    font-size: 1rem;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: var(--transition);
+  }
+
+  form input[type="text"]:focus,
+  form textarea:focus,
+  form select:focus {
+    border-color: var(--input-focus);
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
+    outline: none;
+    background: #2d3748;
+  }
+
+  form textarea {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  form button {
+    background: var(--button-bg);
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  form button:hover {
+    background: var(--button-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  form button::before {
+    content: '➕';
+    font-size: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .hub-header {
+      padding: 15px;
+    }
+
+    .hub-header h1 {
+      font-size: 1.75rem;
+    }
+
+    .section {
+      padding: 15px;
+    }
+
+    form {
+      padding: 20px;
+    }
+  }
+</style>
+
+<div class="hub-header">
   <h1>{{ hub.title }}</h1>
   <p>{{ hub.description }}</p>
-  <div class="categories">
-    <strong>Categories:</strong>
-    {% for category in hub.categories.all %}
-      <span class="category-tag">{{ category.title }}</span>
-    {% empty %}
-      <span>No categories assigned.</span>
-    {% endfor %}
-  </div>
+</div>
 
-  <hr>
-  <h2>Posts in this hub</h2>
-  <ul>
+<div class="categories">
+  <strong>Categories:</strong>
+  {% for category in hub.categories.all %}
+    <span class="category-tag">{{ category.title }}</span>
+  {% empty %}
+    <span>No categories assigned.</span>
+  {% endfor %}
+</div>
+
+<div class="section">
+  <h2>Posts in this Hub</h2>
+  <ul class="post-list">
     {% for post in posts %}
       <li>
-        <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a> — {{ post.author.username }}
-        <span class="vote-count"> ({{ post.vote_count }} votes)</span>
+        <a href="{% url 'post_detail' post.id %}"><strong>{{ post.title }}</strong></a> — {{ post.author.username }}
+        <span class="vote-count">{{ post.vote_count }} ★</span>
       </li>
     {% empty %}
       <li>No posts yet.</li>
     {% endfor %}
   </ul>
+
+  <form method="post" action="{% url 'create_post' hub.id %}">
+    {% csrf_token %}
+    <h3>Add a Post</h3>
+    {{ post_form.as_p }}
+    <button type="submit">Create Post</button>
+  </form>
+</div>
+
+<div class="section">
+  <h2>Discussions in this Hub</h2>
+  <ul class="discussion-list">
+    {% for discussion in discussions %}
+      <li>
+        <a href="{% url 'discussion_detail' discussion.id %}"><strong>{{ discussion.title }}</strong></a> — {{ discussion.author.username }}
+        <span class="vote-count">{{ discussion.vote_count }} 💬</span>
+      </li>
+    {% empty %}
+      <li>No discussions yet.</li>
+    {% endfor %}
+  </ul>
+
+  <form method="post" action="{% url 'create_discussion' hub.id %}">
+    {% csrf_token %}
+    <h3>Start a Discussion</h3>
+    {{ discussion_form.as_p }}
+    <button type="submit">Create Discussion</button>
+  </form>
+</div>
 {% endblock %}

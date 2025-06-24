@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.contenttypes.models import ContentType
-from .forms import PostForm, CommentForm, HubForm
-from .models import Post, Comment, Hub, Vote
+from .forms import PostForm, CommentForm, HubForm, CategoryForm, TagForm, DiscussionForm
+from .models import Post, Comment, Hub, Vote, Category, Tag, Discussion
 from itertools import chain
 
 def success_view(request):
@@ -21,17 +21,19 @@ def dashboard(request):
 
 # Post CRUD
 @login_required
-def create_post_view(request):
-    form = PostForm()
-    if request.method == "POST":
+def create_post_view(request, hub_id):
+    hub = get_object_or_404(Hub, id=hub_id)
+    if request.method == 'POST':
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
+            post.hub = hub
             post.author = request.user
             post.save()
-            form.save_m2m()  
-            return redirect('success')  
-    return render(request, 'create_post.html', {'form': form})
+            form.save_m2m()
+            return redirect('hub_detail', hub_id=hub.id)
+    return redirect('hub_detail', hub_id=hub.id)
+
 
 @login_required
 def update_post_view(request, post_id):
@@ -56,28 +58,32 @@ def delete_post_view(request, post_id):
         return redirect('success')
     return render(request, 'confirm_action.html', {'obj': post})
 
-@login_required
 def post_detail_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    comments = Comment.objects.filter(post=post).order_by('-created_at')
-    new_comment = None
     if request.method == 'POST':
-        form = CommentForm(request.POST)
+        form = CommentForm(data=request.POST)
         if form.is_valid():
-            new_comment = form.save(commit=False)
-            new_comment.post = post
-            new_comment.author = request.user
-            new_comment.save()
+            parent = form.cleaned_data.get('parent')
+            Comment.objects.create(
+                post=post,
+                content=form.cleaned_data['content'],
+                author=request.user,
+                parent=parent
+            )
             return redirect('post_detail', post_id=post.id)
+
     else:
         form = CommentForm()
-    context = {
-        'post': post,
-        'comments': comments,
-        'form': form,
-        'new_comment': new_comment
-    }
-    return render(request, 'post_detail.html', context)
+    comments = post.comments.filter(parent__isnull=True)
+    return render(
+        request,
+        'post_detail.html',
+        {
+            'post': post,
+            'form': form,
+            'comments': comments,
+        }
+    )
 
 # Comment CRUD
 @login_required
@@ -154,13 +160,20 @@ def delete_hub_view(request, hub_id):
         return redirect('success')
     return render(request, 'confirm_action.html', {'obj': hub})
 
-@login_required
+
 def hub_detail_view(request, hub_id):
     hub = get_object_or_404(Hub, id=hub_id)
-    posts = Post.objects.filter(hub=hub).order_by('-created_at')
+    posts = Post.objects.filter(hub=hub)
+    discussions = Discussion.objects.filter(hub=hub)
+    post_form = PostForm()
+    discussion_form = DiscussionForm()
+
     context = {
         'hub': hub,
-        'posts': posts
+        'posts': posts,
+        'discussions': discussions,
+        'post_form': post_form,
+        'discussion_form': discussion_form,
     }
     return render(request, 'hub_detail.html', context)
 
@@ -214,3 +227,62 @@ def recent_activity_view(request):
         'posts': posts,
         'hubs': last_hubs,
     }
+    return render(request, 'recent_activity.html', context)
+
+@login_required
+def create_discussion_view(request, hub_id):
+    hub = get_object_or_404(Hub, id=hub_id)
+    if request.method == 'POST':
+        form = DiscussionForm(request.POST)
+        if form.is_valid():
+            discussion = form.save(commit=False)
+            discussion.hub = hub
+            discussion.author = request.user
+            discussion.save()
+            return redirect('hub_detail', hub_id=hub.id)
+    return redirect('hub_detail', hub_id=hub.id)
+
+
+@login_required
+def edit_discussion_view(request, pk):
+    discussion = get_object_or_404(Discussion, pk=pk, author=request.user)
+    if request.method == 'POST':
+        form = DiscussionForm(data=request.POST, instance=discussion)
+        if form.is_valid():
+            form.save()
+            return redirect('discussion_detail', pk=discussion.pk)
+    else:
+        form = DiscussionForm(instance=discussion)
+    return render(request, 'edit_discussion.html', {'form': form, 'discussion': discussion})
+
+@login_required
+def delete_discussion_view(request, pk):
+    discussion = get_object_or_404(Discussion, pk=pk, author=request.user)
+    if request.method == 'POST':
+        discussion.delete()
+        return redirect('discussion_list')
+    return render(request, 'delete_discussion.html', {'discussion': discussion})
+
+def discussion_detail_view(request, pk):
+    discussion = get_object_or_404(Discussion, pk=pk)
+    comments = Comment.objects.filter(discussion=discussion, parent=None).prefetch_related('replies', 'author')
+
+    if request.method == 'POST' and request.user.is_authenticated:
+        form = CommentForm(data=request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.discussion = discussion
+            parent_id = request.POST.get("parent")
+            if parent_id:
+                comment.parent = Comment.objects.get(id=parent_id)
+            comment.save()
+            return redirect('discussion_detail', pk=discussion.pk)
+    else:
+        form = CommentForm()
+
+    return render(request, 'discussion_detail.html', {
+        'discussion': discussion,
+        'comments': comments,
+        'form': form
+    })

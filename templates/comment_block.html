@@ -1,0 +1,22 @@
+<div class="comment" style="margin-left: {{ comment.parent|default_if_none:0|yesno:'0,20' }}px; padding: 10px; border-left: 2px solid #ccc; margin-bottom: 10px;">
+    <p><strong>{{ comment.author.username }}</strong> — {{ comment.created_at|date:"Y-m-d H:i" }}</p>
+    <p>{{ comment.content }}</p>
+
+    <a href="javascript:void(0);" onclick="toggleReplyForm({{ comment.id }})">↪ Reply</a>
+    {% if comment.replies.all %}
+        <br>
+        <a href="javascript:void(0);" id="toggle-btn-{{ comment.id }}" onclick="toggleReplies({{ comment.id }})">Show Replies</a>
+        <div id="replies-{{ comment.id }}" style="margin-left: 15px; display: none;">
+            {% for reply in comment.replies.all %}
+                {% include "comment_block.html" with comment=reply discussion=discussion %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'discussion_detail' pk=discussion.pk %}" style="display: none;" id="reply-form-{{ comment.id }}">
+        {% csrf_token %}
+        <input type="hidden" name="parent" value="{{ comment.id }}">
+        <textarea name="content" required style="width: 100%; height: 80px;" placeholder="Reply..."></textarea>
+        <button type="submit">Submit</button>
+    </form>
+</div>
