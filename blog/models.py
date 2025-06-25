@@ -49,7 +49,7 @@ class Discussion(models.Model):
     title = models.CharField(max_length=320)
     hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='discussions')
     content = models.TextField()
-    tag = models.ManyToManyField(Tag, related_name='discussions', blank=True)
+    tags = models.ManyToManyField(Tag, related_name='discussions', blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='discussions')
     created_at = models.DateTimeField(default=timezone.now)
     votes = GenericRelation('Vote')
@@ -60,7 +60,7 @@ class Discussion(models.Model):
     class Meta:
         verbose_name = "Discussion"
         verbose_name_plural = "Discussions"
-        ordering = ['tag' ,'-created_at', 'title']
+        ordering = ['-created_at', 'title']
 
 class Post(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)

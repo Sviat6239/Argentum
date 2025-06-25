@@ -56,6 +56,9 @@ class PostForm(forms.ModelForm):
 class DiscussionForm(forms.ModelForm):
     class Meta:
         model = Discussion
-        fields = ['tag', 'title', 'content']
+        fields = ['tags', 'title', 'content']
+        widgets = {
+            'tags': forms.SelectMultiple(),
+        }
 
     

@@ -227,6 +227,7 @@ def recent_activity_view(request):
     context = {
         'posts': posts,
         'hubs': last_hubs,
+        'discussions': Discussion.objects.filter(hub__in=last_hubs).order_by('-created_at')[:20],
     }
     return render(request, 'recent_activity.html', context)
 
@@ -245,13 +246,15 @@ def create_discussion_view(request, hub_id):
 
 
 @login_required
-def edit_discussion_view(request, pk):
-    discussion = get_object_or_404(Discussion, pk=pk, author=request.user)
+def edit_discussion_view(request, pk): 
+    discussion = get_object_or_404(Discussion, id=pk)
+    if request.user != discussion.author:
+        return redirect('hub_detail', hub_id=discussion.hub.id)
     if request.method == 'POST':
-        form = DiscussionForm(data=request.POST, instance=discussion)
+        form = DiscussionForm(request.POST, instance=discussion)
         if form.is_valid():
             form.save()
-            return redirect('discussion_detail', pk=discussion.pk)
+            return redirect('discussion_detail', discussion_id=discussion.id)
     else:
         form = DiscussionForm(instance=discussion)
     return render(request, 'edit_discussion.html', {'form': form, 'discussion': discussion})
@@ -262,7 +265,7 @@ def delete_discussion_view(request, pk):
     if request.method == 'POST':
         discussion.delete()
         return redirect('discussion_list')
-    return render(request, 'delete_discussion.html', {'discussion': discussion})
+    return render(request, 'confirm_action.html', {'discussion': discussion})
 
 def discussion_detail_view(request, pk):
     discussion = get_object_or_404(Discussion, pk=pk)
