@@ -56,6 +56,6 @@ class PostForm(forms.ModelForm):
 class DiscussionForm(forms.ModelForm):
     class Meta:
         model = Discussion
-        fields = ['title', 'content']
+        fields = ['tag', 'title', 'content']
 
     

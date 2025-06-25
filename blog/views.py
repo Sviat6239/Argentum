@@ -16,6 +16,7 @@ def dashboard(request):
     context = {
         'user_posts': user_posts,
         'user_hubs': user_hubs,
+        'user_discussions': Discussion.objects.filter(author=request.user),
     }
     return render(request, 'dashboard.html', context)
 

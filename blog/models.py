@@ -60,7 +60,7 @@ class Discussion(models.Model):
     class Meta:
         verbose_name = "Discussion"
         verbose_name_plural = "Discussions"
-        ordering = ['-created_at', 'title']
+        ordering = ['tag' ,'-created_at', 'title']
 
 class Post(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)

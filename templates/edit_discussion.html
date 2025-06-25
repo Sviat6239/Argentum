@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+  :root {
+    --bg-color: #f4f4f7;
+    --text-color: #1e1e1e;
+    --accent1: #c0c0c0;
+    --accent2: #a6b0bb;
+    --jumbotron-bg: #ffffff;
+    --button-bg: #6c757d;
+    --button-text: #ffffff;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --border-radius: 10px;
+    --transition-speed: 0.3s;
+    --highlight-color: #ff5733;
+  }
+
+  .dark-mode {
+    --bg-color: #1a1c1e;
+    --text-color: #e0e0e0;
+    --accent1: #9fa8b0;
+    --accent2: #5c6370;
+    --jumbotron-bg: #2b2e32;
+    --button-bg: #5a6268;
+    --button-text: #ffffff;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+  }
+
+  .container {
+    margin: 40px auto;
+    padding: 30px;
+    max-width: 1200px;
+    background-color: var(--bg-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--primary-shadow);
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-color);
+  }
+
+  form[method="post"] {
+    margin-top: 20px;
+  }
+
+  form[method="post"] p {
+    margin-bottom: 15px;
+  }
+
+  form[method="post"] input[type="text"],
+  form[method="post"] textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--accent1);
+    border-radius: var(--border-radius);
+    background-color: var(--jumbotron-bg);
+    color: var(--text-color);
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+  }
+
+  form[method="post"] input[type="text"]:focus,
+  form[method="post"] textarea:focus {
+    border-color: var(--highlight-color);
+    box-shadow: 0 0 6px rgba(255, 87, 51, 0.2);
+    outline: none;
+  }
+
+  .animated-button {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed), background-color var(--transition-speed);
+  }
+
+  .animated-button:hover {
+    background-color: var(--highlight-color);
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 15px;
+      margin: 10px auto;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<div class="container">
+  <h1>Edit Discussion</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="animated-button">Save Changes</button>
+  </form>
+</div>
+{% endblock %}

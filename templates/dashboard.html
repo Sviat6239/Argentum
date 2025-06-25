@@ -217,7 +217,7 @@
 
         <div class="d-flex align-items-center gap-3 mt-2 mt-sm-0">
           <span>Total comments: {{ discussion.comments.count }}</span>
-          <a href="{% url 'update_discussion' discussion.id %}" class="btn btn-sm btn-warning">Edit</a>
+          <a href="{% url 'edit_discussion' discussion.id %}" class="btn btn-sm btn-warning">Edit</a>
           <a href="{% url 'delete_discussion' discussion.id %}" class="btn btn-sm btn-danger">Delete</a>
         </div>
       </li>
