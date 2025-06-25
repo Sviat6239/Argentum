@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  :root {
+    --primary-color: #4a90e2;
+    --secondary-color: #2d3748;
+    --text-color: #e2e8f0;
+    --muted-color: #a0aec0;
+    --bg-color: #1a202c;
+    --card-bg: #2d3748;
+    --border-color: #4a5568;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
+  }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+  }
+
+  h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-color);
+  }
+
+  p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--muted-color);
+    margin-bottom: 30px;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 30px 0;
+  }
+
+  h3 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-color);
+  }
+
+  #comments-container {
+    margin-bottom: 30px;
+  }
+
+  form {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+  }
+
+  form p {
+    margin-bottom: 15px;
+  }
+
+  form input[type="text"],
+  form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    transition: var(--transition);
+  }
+
+  form input[type="text"]:focus,
+  form textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
+    outline: none;
+  }
+
+  form button {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  form button:hover {
+    background-color: #357abd;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .no-comments {
+    color: var(--muted-color);
+    font-style: italic;
+  }
+</style>
+
+<h2>{{ discussion.title }}</h2>
+<h3>{{ discussion.tags }}</h3>
+<p>{{ discussion.content }}</p>
+
+
+<hr>
+
+<h3>Comments</h3>
+<div id="comments-container">
+    {% for comment in comments %}
+        {% include "comment_block.html" with comment=comment discussion=discussion %}
+    {% empty %}
+        <p class="no-comments">No comments yet.</p>
+    {% endfor %}
+</div>
+
+<h3>Add a Comment</h3>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit Comment</button>
+</form>
+
+<script>
+    function toggleReplyForm(id) {
+        const form = document.getElementById("reply-form-" + id);
+        if (form) {
+            form.style.display = form.style.display === "none" ? "block" : "none";
+        }
+    }
+
+    function toggleReplies(id) {
+        const block = document.getElementById("replies-" + id);
+        const btn = document.getElementById("toggle-btn-" + id);
+        if (block && btn) {
+            if (block.style.display === "none") {
+                block.style.display = "block";
+                btn.innerText = "Hide Replies";
+            } else {
+                block.style.display = "none";
+                btn.innerText = "Show Replies";
+            }
+        }
+    }
+</script>
+
+{% endblock %}
