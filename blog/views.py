@@ -113,7 +113,7 @@ def update_comment_view(request, comment_id):
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
-            return redirect('success')
+            return redirect('discussion_detail' if comment.discussion else 'post_detail', pk=comment.discussion.id if comment.discussion else comment.post.id)
     else:
         form = CommentForm(instance=comment)
     return render(request, 'update_comment.html', {'form': form, 'comment': comment})
@@ -124,8 +124,10 @@ def delete_comment_view(request, comment_id):
     if comment.author != request.user:
         return HttpResponseForbidden("You are not allowed to delete this comment.")
     if request.method == 'POST':
+        redirect_view = 'discussion_detail' if comment.discussion else 'post_detail'
+        redirect_id = comment.discussion.id if comment.discussion else comment.post.id
         comment.delete()
-        return redirect('success')
+        return redirect(redirect_view, pk=redirect_id)
     return render(request, 'confirm_action.html', {'obj': comment})
 
 # Hub CRUD
@@ -289,14 +291,15 @@ def delete_discussion_view(request, pk):
     if discussion.author != request.user:
         return HttpResponseForbidden("You are not allowed to delete this discussion.")
     if request.method == 'POST':
+        hub_id = discussion.hub.id
         discussion.delete()
-        return redirect('success')
+        return redirect('hub_detail', hub_id=hub_id)
     return render(request, 'confirm_action.html', {'obj': discussion})
 
 def discussion_detail_view(request, pk):
     discussion = get_object_or_404(Discussion, pk=pk)
     comments = Comment.objects.filter(discussion=discussion, parent__isnull=True).prefetch_related('replies', 'author')
-    if request.method == 'POST' and request.user.is_authenticated:
+    if request.method == 'POST':
         form = CommentForm(data=request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
