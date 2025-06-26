@@ -9,7 +9,7 @@ class CommentForm(forms.ModelForm):
             'content': 'Content',
         }
         widgets = {
-            'content': forms.Textarea(attrs={'placeholder': 'e.g. Nice post!'}),
+            'content': forms.Textarea(attrs={'placeholder': 'e.g. Nice post!', 'rows': 4, 'class': 'form-control'}),
         }
 
 class HubForm(forms.ModelForm):
@@ -22,9 +22,9 @@ class HubForm(forms.ModelForm):
             'categories': 'Categories',
         }
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice hub!'}),
-            'description': forms.Textarea(attrs={'placeholder': 'e.g. Join our hub'}),
-            'categories': forms.SelectMultiple(),
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice hub!', 'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'placeholder': 'e.g. Join our hub', 'rows': 6, 'class': 'form-control'}),
+            'categories': forms.SelectMultiple(attrs={'size': 5, 'class': 'form-control'}),
         }
 
 class CategoryForm(forms.ModelForm):
@@ -35,30 +35,50 @@ class CategoryForm(forms.ModelForm):
             'title': 'Title',
         }
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice category!'}),
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice category!', 'class': 'form-control'}),
         }
 
 class TagForm(forms.ModelForm):
     class Meta:
         model = Tag
-        fields = ['title']
+        fields = ['name']
         labels = {
-            'title': 'Title',
+            'name': 'Name',
         }
         widgets = {
-            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice tag!'}),
+            'name': forms.TextInput(attrs={'placeholder': 'e.g. Nice tag!', 'class': 'form-control'}),
         }
+
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['tags', 'title', 'content']
+        fields = ['hub', 'tags', 'title', 'content']  # Added hub
+        labels = {
+            'hub': 'Hub',
+            'tags': 'Tags',
+            'title': 'Title',
+            'content': 'Content',
+        }
+        widgets = {
+            'hub': forms.Select(attrs={'class': 'form-control'}),
+            'tags': forms.SelectMultiple(attrs={'size': 5, 'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice post!', 'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'placeholder': 'e.g. Write your post here...', 'rows': 6, 'class': 'form-control'}),
+        }
 
 class DiscussionForm(forms.ModelForm):
     class Meta:
         model = Discussion
-        fields = ['tags', 'title', 'content']
-        widgets = {
-            'tags': forms.SelectMultiple(),
+        fields = ['hub', 'tag', 'title', 'content']  # Added hub
+        labels = {
+            'hub': 'Hub',
+            'tag': 'Tags',
+            'title': 'Title',
+            'content': 'Content',
         }
-
-    
+        widgets = {
+            'hub': forms.Select(attrs={'class': 'form-control'}),
+            'tag': forms.SelectMultiple(attrs={'size': 5, 'class': 'form-control'}),
+            'title': forms.TextInput(attrs={'placeholder': 'e.g. Nice discussion!', 'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'placeholder': 'e.g. Write your discussion here...', 'rows': 6, 'class': 'form-control'}),
+        }

@@ -33,20 +33,22 @@ def create_post_view(request, hub_id):
             post.save()
             form.save_m2m()
             return redirect('hub_detail', hub_id=hub.id)
-    return redirect('hub_detail', hub_id=hub.id)
-
+    else:
+        form = PostForm(initial={'hub': hub})
+    return render(request, 'create_post.html', {'form': form, 'hub': hub})
 
 @login_required
 def update_post_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if post.author != request.user:
         return HttpResponseForbidden("You are not allowed to edit this post.")
-    form = PostForm(instance=post)
     if request.method == 'POST':
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
             form.save()
             return redirect('success')
+    else:
+        form = PostForm(instance=post)
     return render(request, 'edit_post.html', {'form': form, 'post': post})
 
 @login_required
@@ -64,7 +66,8 @@ def post_detail_view(request, post_id):
     if request.method == 'POST':
         form = CommentForm(data=request.POST)
         if form.is_valid():
-            parent = form.cleaned_data.get('parent')
+            parent_id = request.POST.get('parent')
+            parent = Comment.objects.get(id=parent_id) if parent_id else None
             Comment.objects.create(
                 post=post,
                 content=form.cleaned_data['content'],
@@ -72,10 +75,9 @@ def post_detail_view(request, post_id):
                 parent=parent
             )
             return redirect('post_detail', post_id=post.id)
-
     else:
         form = CommentForm()
-    comments = post.comments.filter(parent__isnull=True)
+    comments = post.comments.filter(parent__isnull=True).prefetch_related('replies', 'author')
     return render(
         request,
         'post_detail.html',
@@ -90,7 +92,6 @@ def post_detail_view(request, post_id):
 @login_required
 def create_comment_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    form = CommentForm()
     if request.method == 'POST':
         form = CommentForm(request.POST)
         if form.is_valid():
@@ -99,6 +100,8 @@ def create_comment_view(request, post_id):
             comment.author = request.user
             comment.save()
             return redirect('success')
+    else:
+        form = CommentForm()
     return render(request, 'create_comment.html', {'form': form, 'post': post})
 
 @login_required
@@ -106,12 +109,13 @@ def update_comment_view(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
     if comment.author != request.user:
         return HttpResponseForbidden("You are not allowed to edit this comment.")
-    form = CommentForm(instance=comment)
     if request.method == 'POST':
         form = CommentForm(request.POST, instance=comment)
         if form.is_valid():
             form.save()
             return redirect('success')
+    else:
+        form = CommentForm(instance=comment)
     return render(request, 'update_comment.html', {'form': form, 'comment': comment})
 
 @login_required
@@ -127,15 +131,16 @@ def delete_comment_view(request, comment_id):
 # Hub CRUD
 @login_required
 def create_hub_view(request):
-    form = HubForm()
     if request.method == 'POST':
         form = HubForm(request.POST)
         if form.is_valid():
             hub = form.save(commit=False)
             hub.author = request.user
             hub.save()
-            form.save_m2m()  
+            form.save_m2m()
             return redirect('success')
+    else:
+        form = HubForm()
     return render(request, 'create_hub.html', {'form': form})
 
 @login_required
@@ -143,12 +148,13 @@ def update_hub_view(request, hub_id):
     hub = get_object_or_404(Hub, id=hub_id)
     if hub.author != request.user:
         return HttpResponseForbidden("You are not allowed to edit this hub.")
-    form = HubForm(instance=hub)
     if request.method == 'POST':
         form = HubForm(request.POST, instance=hub)
         if form.is_valid():
             form.save()
             return redirect('success')
+    else:
+        form = HubForm(instance=hub)
     return render(request, 'edit_hub.html', {'form': form, 'hub': hub})
 
 @login_required
@@ -161,14 +167,32 @@ def delete_hub_view(request, hub_id):
         return redirect('success')
     return render(request, 'confirm_action.html', {'obj': hub})
 
-
 def hub_detail_view(request, hub_id):
     hub = get_object_or_404(Hub, id=hub_id)
-    posts = Post.objects.filter(hub=hub)
-    discussions = Discussion.objects.filter(hub=hub)
-    post_form = PostForm()
-    discussion_form = DiscussionForm()
-
+    posts = Post.objects.filter(hub=hub).prefetch_related('tags', 'author')
+    discussions = Discussion.objects.filter(hub=hub).prefetch_related('tag', 'author')
+    if request.method == 'POST':
+        if 'post_submit' in request.POST:
+            post_form = PostForm(request.POST)
+            if post_form.is_valid():
+                post = post_form.save(commit=False)
+                post.hub = hub
+                post.author = request.user
+                post.save()
+                post_form.save_m2m()
+                return redirect('hub_detail', hub_id=hub.id)
+        elif 'discussion_submit' in request.POST:
+            discussion_form = DiscussionForm(request.POST)
+            if form.is_valid():
+                discussion = discussion_form.save(commit=False)
+                discussion.hub = hub
+                discussion.author = request.user
+                discussion.save()
+                discussion_form.save_m2m()
+                return redirect('hub_detail', hub_id=hub.id)
+    else:
+        post_form = PostForm(initial={'hub': hub})
+        discussion_form = DiscussionForm(initial={'hub': hub})
     context = {
         'hub': hub,
         'posts': posts,
@@ -192,7 +216,7 @@ def upvote_view(request, content_type, object_id):
     if not created and vote.value != 1:
         vote.value = 1
         vote.save()
-    return redirect(request.META.get('HTTP_REFERER', 'post_detail'))
+    return redirect(request.META.get('HTTP_REFERER', 'success'))
 
 @login_required
 def downvote_view(request, content_type, object_id):
@@ -207,7 +231,7 @@ def downvote_view(request, content_type, object_id):
     if not created and vote.value != -1:
         vote.value = -1
         vote.save()
-    return redirect(request.META.get('HTTP_REFERER', 'post_detail'))
+    return redirect(request.META.get('HTTP_REFERER', 'success'))
 
 def get_post_votes(post):
     upvotes = post.votes.filter(value=1).count()
@@ -221,13 +245,11 @@ def get_hub_total_votes(hub):
 
 def recent_activity_view(request):
     last_hubs = Hub.objects.order_by('-created_at')[:5]
-    
     posts = Post.objects.filter(hub__in=last_hubs).order_by('-created_at')[:20]
-    
     context = {
         'posts': posts,
         'hubs': last_hubs,
-        'discussions': Discussion.objects.filter(hub__in=last_hubs).order_by('-created_at')[:20],
+        'discussions': Discussion.objects.filter(hub__in=last_hubs).order_by('-created_at')[:5],
     }
     return render(request, 'recent_activity.html', context)
 
@@ -241,50 +263,52 @@ def create_discussion_view(request, hub_id):
             discussion.hub = hub
             discussion.author = request.user
             discussion.save()
+            form.save_m2m()
             return redirect('hub_detail', hub_id=hub.id)
-    return redirect('hub_detail', hub_id=hub.id)
-
+    else:
+        form = DiscussionForm(initial={'hub': hub})
+    return render(request, 'create_discussion.html', {'form': form, 'hub': hub})
 
 @login_required
-def edit_discussion_view(request, pk): 
+def edit_discussion_view(request, pk):
     discussion = get_object_or_404(Discussion, id=pk)
     if request.user != discussion.author:
-        return redirect('hub_detail', hub_id=discussion.hub.id)
+        return HttpResponseForbidden("You are not allowed to edit this discussion.")
     if request.method == 'POST':
         form = DiscussionForm(request.POST, instance=discussion)
         if form.is_valid():
             form.save()
-            return redirect('discussion_detail', discussion_id=discussion.id)
+            return redirect('discussion_detail', pk=discussion.id)
     else:
         form = DiscussionForm(instance=discussion)
     return render(request, 'edit_discussion.html', {'form': form, 'discussion': discussion})
 
 @login_required
 def delete_discussion_view(request, pk):
-    discussion = get_object_or_404(Discussion, pk=pk, author=request.user)
+    discussion = get_object_or_404(Discussion, pk=pk)
+    if discussion.author != request.user:
+        return HttpResponseForbidden("You are not allowed to delete this discussion.")
     if request.method == 'POST':
         discussion.delete()
-        return redirect('discussion_list')
-    return render(request, 'confirm_action.html', {'discussion': discussion})
+        return redirect('success')
+    return render(request, 'confirm_action.html', {'obj': discussion})
 
 def discussion_detail_view(request, pk):
     discussion = get_object_or_404(Discussion, pk=pk)
-    comments = Comment.objects.filter(discussion=discussion, parent=None).prefetch_related('replies', 'author')
-
+    comments = Comment.objects.filter(discussion=discussion, parent__isnull=True).prefetch_related('replies', 'author')
     if request.method == 'POST' and request.user.is_authenticated:
         form = CommentForm(data=request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.author = request.user
             comment.discussion = discussion
-            parent_id = request.POST.get("parent")
+            parent_id = request.POST.get('parent')
             if parent_id:
                 comment.parent = Comment.objects.get(id=parent_id)
             comment.save()
             return redirect('discussion_detail', pk=discussion.pk)
     else:
         form = CommentForm()
-
     return render(request, 'discussion_detail.html', {
         'discussion': discussion,
         'comments': comments,
