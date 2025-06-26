@@ -17,6 +17,8 @@
     --highlight-color: #ff5733;
     --upvote-bg: #28a745;
     --downvote-bg: #dc3545;
+    --edit-bg: #007bff;
+    --delete-bg: #dc3545;
   }
 
   .dark-mode {
@@ -31,6 +33,8 @@
     --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     --upvote-bg: #218838;
     --downvote-bg: #c82333;
+    --edit-bg: #0056b3;
+    --delete-bg: #c82333;
   }
 
   body {
@@ -81,7 +85,19 @@
     padding: 0;
   }
 
+  li {
+    background-color: var(--jumbotron-bg);
+    border: 1px solid var(--accent1);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  }
 
+  li:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+  }
 
   ul ul li {
     background-color: var(--accent2);
@@ -155,6 +171,22 @@
   }
 
   .animated-button.downvote:hover {
+    background-color: #c82333;
+  }
+
+  .animated-button.edit {
+    background-color: var(--edit-bg);
+  }
+
+  .animated-button.edit:hover {
+    background-color: #0056b3;
+  }
+
+  .animated-button.delete {
+    background-color: var(--delete-bg);
+  }
+
+  .animated-button.delete:hover {
     background-color: #c82333;
   }
 
@@ -282,6 +314,17 @@
         Downvote
       </button>
     </form>
+    {% if post.author == request.user %}
+      <a href="{% url 'update_post' post_id=post.id %}" class="animated-button edit">
+        Edit
+      </a>
+      <form method="post" action="{% url 'delete_post' post_id=post.id %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="animated-button delete" onclick="return confirm('Are you sure you want to delete this post?');">
+          Delete
+        </button>
+      </form>
+    {% endif %}
   </div>
 
   <hr>
@@ -289,7 +332,7 @@
 
   <ul>
     {% for comment in comments %}
-      {% include 'comment.html' with comment=comment %}
+      {% include 'comment.html' with comment=comment user=request.user %}
     {% empty %}
       <li>No comments yet.</li>
     {% endfor %}
@@ -309,6 +352,13 @@
 <script>
   function toggleReplyForm(commentId) {
     const form = document.getElementById(`reply-form-${commentId}`);
+    if (form) {
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+
+  function toggleEditForm(commentId) {
+    const form = document.getElementById(`edit-form-${commentId}`);
     if (form) {
       form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }

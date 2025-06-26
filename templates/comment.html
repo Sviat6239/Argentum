@@ -1,5 +1,18 @@
 <li>
-  <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
+    {% if comment.author == user %}
+      <button onclick="toggleEditForm('{{ comment.id }}')" class="animated-button edit" style="margin-left: auto;">
+        Edit
+      </button>
+      <form method="post" action="{% url 'delete_comment' comment_id=comment.id %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="animated-button delete" onclick="return confirm('Are you sure you want to delete this comment?');">
+          Delete
+        </button>
+      </form>
+    {% endif %}
+  </div>
   <div class="vote-controls">
     <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
       {% csrf_token %}
@@ -16,21 +29,31 @@
     <button onclick="toggleReplyForm('{{ comment.id }}')" class="animated-button">
       Reply
     </button>
+  </div>
 
-    <form id="reply-form-{{ comment.id }}" method="post" class="reply-form">
+  <form id="reply-form-{{ comment.id }}" method="post" class="reply-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="parent" value="{{ comment.id }}">
+    <button type="submit" class="animated-button">
+      Submit Reply
+    </button>
+  </form>
+
+  {% if comment.author == user %}
+    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'update_comment' comment_id=comment.id %}" class="reply-form">
       {% csrf_token %}
       {{ form.as_p }}
-      <input type="hidden" name="parent" value="{{ comment.id }}">
       <button type="submit" class="animated-button">
-        Submit Reply
+        Save Changes
       </button>
     </form>
-  </div>
+  {% endif %}
 
   {% if comment.replies.all %}
     <ul style="margin-left: 30px">
       {% for reply in comment.replies.all %}
-        {% include 'comment.html' with comment=reply %}
+        {% include 'comment.html' with comment=reply user=user %}
       {% endfor %}
     </ul>
   {% endif %}
