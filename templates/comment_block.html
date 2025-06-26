@@ -1,22 +1,41 @@
-<div class="comment" style="margin-left: {{ comment.parent|default_if_none:0|yesno:'0,20' }}px; padding: 10px; border-left: 2px solid #ccc; margin-bottom: 10px;">
-    <p><strong>{{ comment.author.username }}</strong> — {{ comment.created_at|date:"Y-m-d H:i" }}</p>
-    <p>{{ comment.content }}</p>
-
-    <a href="javascript:void(0);" onclick="toggleReplyForm({{ comment.id }})">↪ Reply</a>
-    {% if comment.replies.all %}
-        <br>
-        <a href="javascript:void(0);" id="toggle-btn-{{ comment.id }}" onclick="toggleReplies({{ comment.id }})">Show Replies</a>
-        <div id="replies-{{ comment.id }}" style="margin-left: 15px; display: none;">
-            {% for reply in comment.replies.all %}
-                {% include "comment_block.html" with comment=reply discussion=discussion %}
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <form method="post" action="{% url 'discussion_detail' pk=discussion.pk %}" style="display: none;" id="reply-form-{{ comment.id }}">
+<div style="background-color: var(--card-bg); padding: 15px; margin-bottom: 10px; border-radius: var(--border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
+    {% if comment.author == user %}
+      <button onclick="toggleEditForm('{{ comment.id }}')" style="margin-left: auto; background-color: var(--edit-bg); color: #ffffff; border: none; padding: 6px 12px; border-radius: var(--border-radius); cursor: pointer; transition: var(--transition);" onmouseover="this.style.backgroundColor='#218838'" onmouseout="this.style.backgroundColor='#28a745'">Edit</button>
+      <form method="post" action="{% url 'delete_comment' comment_id=comment.id %}" style="display: inline;">
         {% csrf_token %}
-        <input type="hidden" name="parent" value="{{ comment.id }}">
-        <textarea name="content" required style="width: 100%; height: 80px;" placeholder="Reply..."></textarea>
-        <button type="submit">Submit</button>
+        <button type="submit" style="background-color: var(--delete-bg); color: #ffffff; border: none; padding: 6px 12px; border-radius: var(--border-radius); cursor: pointer; transition: var(--transition);" onmouseover="this.style.backgroundColor='#c82333'" onmouseout="this.style.backgroundColor='#dc3545'" onclick="return confirm('Are you sure you want to delete this comment?');">Delete</button>
+      </form>
+    {% endif %}
+  </div>
+  <div class="action-buttons" style="margin-top: 10px;">
+    {% if comment.replies.all %}
+      <button id="toggle-btn-{{ comment.id }}" onclick="toggleReplies('{{ comment.id }}')" style="background-color: var(--primary-color); color: #ffffff; border: none; padding: 6px 12px; border-radius: var(--border-radius); cursor: pointer; transition: var(--transition);" onmouseover="this.style.backgroundColor='#357abd'" onmouseout="this.style.backgroundColor='#4a90e2'">Show Replies</button>
+    {% endif %}
+    <button onclick="toggleReplyForm('{{ comment.id }}')" style="background-color: var(--primary-color); color: #ffffff; border: none; padding: 6px 12px; border-radius: var(--border-radius); cursor: pointer; transition: var(--transition);" onmouseover="this.style.backgroundColor='#357abd'" onmouseout="this.style.backgroundColor='#4a90e2'">Reply</button>
+  </div>
+
+  <form id="reply-form-{{ comment.id }}" method="post" style="display: none; margin-top: 10px; padding: 10px; background-color: var(--secondary-color); border-radius: var(--border-radius);">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="parent" value="{{ comment.id }}">
+    <button type="submit" style="background-color: var(--primary-color); color: #ffffff; border: none; padding: 6px 12px; border-radius: var(--border-radius); cursor: pointer; transition: var(--transition);" onmouseover="this.style.backgroundColor='#357abd'" onmouseout="this.style.backgroundColor='#4a90e2'">Submit Reply</button>
+  </form>
+
+  {% if comment.author == user %}
+    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'update_comment' comment_id=comment.id %}" style="display: none; margin-top: 10px; padding: 10px; background-color: var(--secondary-color); border-radius: var(--border-radius);">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" style="background-color: var(--primary-color); color: #ffffff; border: none; padding: 6px 12px; border-radius: var(--border-radius); cursor: pointer; transition: var(--transition);" onmouseover="this.style.backgroundColor='#357abd'" onmouseout="this.style.backgroundColor='#4a90e2'">Save Changes</button>
     </form>
+  {% endif %}
+
+  {% if comment.replies.all %}
+    <div id="replies-{{ comment.id }}" style="margin-left: 20px; margin-top: 10px; display: none;">
+      {% for reply in comment.replies.all %}
+        {% include "comment_block.html" with comment=reply discussion=discussion user=user %}
+      {% endfor %}
+    </div>
+  {% endif %}
 </div>
