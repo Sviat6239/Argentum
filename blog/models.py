@@ -17,16 +17,15 @@ class Category(models.Model):
         ordering = ['title']
 
 class Tag(models.Model):
-    id = models.AutoField(primary_key=True, auto_created=True)
-    title = models.CharField(max_length=60)
+    name = models.CharField(max_length=50, unique=True)  # Removed null=True, blank=True
 
     def __str__(self):
-        return self.title
+        return self.name
 
     class Meta:
         verbose_name = "Tag"
         verbose_name_plural = "Tags"
-        ordering = ['title']
+        ordering = ['name']
 
 class Hub(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
@@ -49,7 +48,7 @@ class Discussion(models.Model):
     title = models.CharField(max_length=320)
     hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='discussions')
     content = models.TextField()
-    tags = models.ManyToManyField(Tag, related_name='discussions', blank=True)
+    tag = models.ManyToManyField(Tag, related_name='discussions', blank=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='discussions')
     created_at = models.DateTimeField(default=timezone.now)
     votes = GenericRelation('Vote')
@@ -65,7 +64,7 @@ class Discussion(models.Model):
 class Post(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
     hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='posts')
-    tags = models.ManyToManyField(Tag, related_name='posts')
+    tags = models.ManyToManyField(Tag, related_name='posts', blank=True)  # Added blank=True
     title = models.CharField(max_length=320)
     content = models.TextField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
