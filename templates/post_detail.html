@@ -81,10 +81,7 @@
     padding: 0;
   }
 
-  li:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--hover-shadow);
-  }
+
 
   ul ul li {
     background-color: var(--accent2);
@@ -161,7 +158,7 @@
     background-color: #c82333;
   }
 
-  form#reply-form-{{ comment.id }} {
+  .reply-form {
     margin-top: 10px;
     padding: 10px;
     background-color: var(--accent2);
@@ -169,12 +166,12 @@
     display: none;
   }
 
-  form#reply-form-{{ comment.id }} p {
+  .reply-form p {
     margin-bottom: 10px;
   }
 
-  form#reply-form-{{ comment.id }} input[type="text"],
-  form#reply-form-{{ comment.id }} textarea {
+  .reply-form input[type="text"],
+  .reply-form textarea {
     width: 100%;
     padding: 8px;
     border: 2px solid var(--accent1);
@@ -184,18 +181,18 @@
     transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
   }
 
-  form#reply-form-{{ comment.id }} input[type="text"]:focus,
-  form#reply-form-{{ comment.id }} textarea:focus {
+  .reply-form input[type="text"]:focus,
+  .reply-form textarea:focus {
     border-color: var(--highlight-color);
     box-shadow: 0 0 6px rgba(255, 87, 51, 0.2);
     outline: none;
   }
 
-  form#reply-form-{{ comment.id }} .animated-button {
+  .reply-form .animated-button {
     background-color: var(--button-bg);
   }
 
-  form#reply-form-{{ comment.id }} .animated-button:hover {
+  .reply-form .animated-button:hover {
     background-color: var(--highlight-color);
   }
 
@@ -292,61 +289,9 @@
 
   <ul>
     {% for comment in comments %}
-    <li>
-      <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
-      <div class="vote-controls">
-        <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
-          {% csrf_token %}
-          <button type="submit" class="animated-button upvote">
-            Upvote ({{ comment.vote_count }})
-          </button>
-        </form>
-        <form method="post" action="{% url 'downvote' content_type='comment' object_id=comment.id %}">
-          {% csrf_token %}
-          <button type="submit" class="animated-button downvote">
-            Downvote
-          </button>
-        </form>
-        <button onclick="toggleReplyForm('{{ comment.id }}')" class="animated-button">
-          Reply
-        </button>
-
-        <form id="reply-form-{{ comment.id }}" method="post" style="display: none">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <input type="hidden" name="parent" value="{{ comment.id }}">
-          <button type="submit" class="animated-button">
-            Submit Reply
-          </button>
-        </form>
-      </div>
-
-      {% if comment.replies.all %}
-      <ul style="margin-left: 30px">
-        {% for reply in comment.replies.all %}
-        <li>
-          <strong>{{ reply.author.username }}:</strong> {{ reply.content }}
-          <div class="vote-controls">
-            <form method="post" action="{% url 'upvote' content_type='comment' object_id=reply.id %}">
-              {% csrf_token %}
-              <button type="submit" class="animated-button upvote">
-                Upvote ({{ reply.vote_count }})
-              </button>
-            </form>
-            <form method="post" action="{% url 'downvote' content_type='comment' object_id=reply.id %}">
-              {% csrf_token %}
-              <button type="submit" class="animated-button downvote">
-                Downvote
-              </button>
-            </form>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-    </li>
+      {% include 'comment.html' with comment=comment %}
     {% empty %}
-    <li>No comments yet.</li>
+      <li>No comments yet.</li>
     {% endfor %}
   </ul>
 

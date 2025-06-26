@@ -1,0 +1,37 @@
+<li>
+  <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
+  <div class="vote-controls">
+    <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
+      {% csrf_token %}
+      <button type="submit" class="animated-button upvote">
+        Upvote ({{ comment.vote_count }})
+      </button>
+    </form>
+    <form method="post" action="{% url 'downvote' content_type='comment' object_id=comment.id %}">
+      {% csrf_token %}
+      <button type="submit" class="animated-button downvote">
+        Downvote
+      </button>
+    </form>
+    <button onclick="toggleReplyForm('{{ comment.id }}')" class="animated-button">
+      Reply
+    </button>
+
+    <form id="reply-form-{{ comment.id }}" method="post" class="reply-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="hidden" name="parent" value="{{ comment.id }}">
+      <button type="submit" class="animated-button">
+        Submit Reply
+      </button>
+    </form>
+  </div>
+
+  {% if comment.replies.all %}
+    <ul style="margin-left: 30px">
+      {% for reply in comment.replies.all %}
+        {% include 'comment.html' with comment=reply %}
+      {% endfor %}
+    </ul>
+  {% endif %}
+</li>
