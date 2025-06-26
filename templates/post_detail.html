@@ -17,6 +17,8 @@
     --highlight-color: #ff5733;
     --upvote-bg: #28a745;
     --downvote-bg: #dc3545;
+    --edit-bg: #007bff;
+    --delete-bg: #dc3545;
   }
 
   .dark-mode {
@@ -31,6 +33,8 @@
     --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
     --upvote-bg: #218838;
     --downvote-bg: #c82333;
+    --edit-bg: #0056b3;
+    --delete-bg: #c82333;
   }
 
   body {
@@ -79,6 +83,15 @@
   ul {
     list-style: none;
     padding: 0;
+  }
+
+  li {
+    background-color: var(--jumbotron-bg);
+    border: 1px solid var(--accent1);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+    transition: transform var(--transition-speed), box-shadow var(--transition-speed);
   }
 
   li:hover {
@@ -161,7 +174,23 @@
     background-color: #c82333;
   }
 
-  form#reply-form-{{ comment.id }} {
+  .animated-button.edit {
+    background-color: var(--edit-bg);
+  }
+
+  .animated-button.edit:hover {
+    background-color: #0056b3;
+  }
+
+  .animated-button.delete {
+    background-color: var(--delete-bg);
+  }
+
+  .animated-button.delete:hover {
+    background-color: #c82333;
+  }
+
+  .reply-form {
     margin-top: 10px;
     padding: 10px;
     background-color: var(--accent2);
@@ -169,12 +198,12 @@
     display: none;
   }
 
-  form#reply-form-{{ comment.id }} p {
+  .reply-form p {
     margin-bottom: 10px;
   }
 
-  form#reply-form-{{ comment.id }} input[type="text"],
-  form#reply-form-{{ comment.id }} textarea {
+  .reply-form input[type="text"],
+  .reply-form textarea {
     width: 100%;
     padding: 8px;
     border: 2px solid var(--accent1);
@@ -184,18 +213,18 @@
     transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
   }
 
-  form#reply-form-{{ comment.id }} input[type="text"]:focus,
-  form#reply-form-{{ comment.id }} textarea:focus {
+  .reply-form input[type="text"]:focus,
+  .reply-form textarea:focus {
     border-color: var(--highlight-color);
     box-shadow: 0 0 6px rgba(255, 87, 51, 0.2);
     outline: none;
   }
 
-  form#reply-form-{{ comment.id }} .animated-button {
+  .reply-form .animated-button {
     background-color: var(--button-bg);
   }
 
-  form#reply-form-{{ comment.id }} .animated-button:hover {
+  .reply-form .animated-button:hover {
     background-color: var(--highlight-color);
   }
 
@@ -285,6 +314,17 @@
         Downvote
       </button>
     </form>
+    {% if post.author == request.user %}
+      <a href="{% url 'update_post' post_id=post.id %}" class="animated-button edit">
+        Edit
+      </a>
+      <form method="post" action="{% url 'delete_post' post_id=post.id %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="animated-button delete" onclick="return confirm('Are you sure you want to delete this post?');">
+          Delete
+        </button>
+      </form>
+    {% endif %}
   </div>
 
   <hr>
@@ -292,61 +332,9 @@
 
   <ul>
     {% for comment in comments %}
-    <li>
-      <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
-      <div class="vote-controls">
-        <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
-          {% csrf_token %}
-          <button type="submit" class="animated-button upvote">
-            Upvote ({{ comment.vote_count }})
-          </button>
-        </form>
-        <form method="post" action="{% url 'downvote' content_type='comment' object_id=comment.id %}">
-          {% csrf_token %}
-          <button type="submit" class="animated-button downvote">
-            Downvote
-          </button>
-        </form>
-        <button onclick="toggleReplyForm('{{ comment.id }}')" class="animated-button">
-          Reply
-        </button>
-
-        <form id="reply-form-{{ comment.id }}" method="post" style="display: none">
-          {% csrf_token %}
-          {{ form.as_p }}
-          <input type="hidden" name="parent" value="{{ comment.id }}">
-          <button type="submit" class="animated-button">
-            Submit Reply
-          </button>
-        </form>
-      </div>
-
-      {% if comment.replies.all %}
-      <ul style="margin-left: 30px">
-        {% for reply in comment.replies.all %}
-        <li>
-          <strong>{{ reply.author.username }}:</strong> {{ reply.content }}
-          <div class="vote-controls">
-            <form method="post" action="{% url 'upvote' content_type='comment' object_id=reply.id %}">
-              {% csrf_token %}
-              <button type="submit" class="animated-button upvote">
-                Upvote ({{ reply.vote_count }})
-              </button>
-            </form>
-            <form method="post" action="{% url 'downvote' content_type='comment' object_id=reply.id %}">
-              {% csrf_token %}
-              <button type="submit" class="animated-button downvote">
-                Downvote
-              </button>
-            </form>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-    </li>
+      {% include 'comment.html' with comment=comment user=request.user %}
     {% empty %}
-    <li>No comments yet.</li>
+      <li>No comments yet.</li>
     {% endfor %}
   </ul>
 
@@ -364,6 +352,13 @@
 <script>
   function toggleReplyForm(commentId) {
     const form = document.getElementById(`reply-form-${commentId}`);
+    if (form) {
+      form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+  }
+
+  function toggleEditForm(commentId) {
+    const form = document.getElementById(`edit-form-${commentId}`);
     if (form) {
       form.style.display = form.style.display === 'none' ? 'block' : 'none';
     }
