@@ -317,3 +317,15 @@ def discussion_detail_view(request, pk):
         'comments': comments,
         'form': form
     })
+
+@login_required
+def hubs_overview_view(request):
+    user_hubs = Hub.objects.filter(author=request.user)
+    categories = Category.objects.all()
+    tags = Tag.objects.all()
+    context = {
+        'user_hubs': user_hubs,
+        'categories': categories,
+        'tags': tags,
+    }
+    return render(request, 'hubs_overview.html', context)

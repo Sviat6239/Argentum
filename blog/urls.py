@@ -25,5 +25,6 @@ urlpatterns = [
     path('hub/<int:hub_id>/', views.hub_detail_view, name='hub_detail'),
     path('hub/<int:hub_id>/create_post/', views.create_post_view, name='create_post'),
     path('hub/<int:hub_id>/create_discussion/', views.create_discussion_view, name='create_discussion'),
+    path('hubs/', views.hubs_overview_view, name='hubs_overview'),
 
 ]
