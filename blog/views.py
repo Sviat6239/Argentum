@@ -2,9 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.contenttypes.models import ContentType
-from .forms import PostForm, CommentForm, HubForm, CategoryForm, TagForm, DiscussionForm
+from .forms import PostForm, CommentForm, HubForm, DiscussionForm
 from .models import Post, Comment, Hub, Vote, Category, Tag, Discussion
-from itertools import chain
 
 def success_view(request):
     return render(request, 'success.html')
@@ -321,11 +320,16 @@ def discussion_detail_view(request, pk):
 @login_required
 def hubs_overview_view(request):
     user_hubs = Hub.objects.filter(author=request.user)
+    all_hubs = Hub.objects.all()
     categories = Category.objects.all()
     tags = Tag.objects.all()
     context = {
         'user_hubs': user_hubs,
+        'all_hubs': all_hubs,
         'categories': categories,
         'tags': tags,
     }
     return render(request, 'hubs_overview.html', context)
+
+
+
