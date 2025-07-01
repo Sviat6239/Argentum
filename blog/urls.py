@@ -24,7 +24,11 @@ urlpatterns = [
     path('discussion/<int:pk>/delete/', views.delete_discussion_view, name='delete_discussion'),
     path('hub/<int:hub_id>/', views.hub_detail_view, name='hub_detail'),
     path('hub/<int:hub_id>/create_post/', views.create_post_view, name='create_post'),
-    path('hub/<int:hub_id>/create_discussion/', views.create_discussion_view, name='create_discussion'),
+    path('discussion/create/<int:hub_id>/', views.create_discussion_view, name='create_discussion'),
     path('hubs/', views.hubs_overview_view, name='hubs_overview'),
+    path('hub/<int:hub_id>/follow/', views.follow_hub, name='follow_hub'),
+    path('hub/<int:hub_id>/unfollow/', views.unfollow_hub, name='unfollow_hub'),
+    path('user/<int:user_id>/follow/', views.follow_user, name='follow_user'),
+    path('user/<int:user_id>/unfollow/', views.unfollow_user, name='unfollow_user'),
 
 ]

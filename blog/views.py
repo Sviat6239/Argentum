@@ -3,7 +3,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseForbidden
 from django.contrib.contenttypes.models import ContentType
 from .forms import PostForm, CommentForm, HubForm, DiscussionForm
-from .models import Post, Comment, Hub, Vote, Category, Tag, Discussion
+from .models import Post, Comment, Hub, Vote, Category, Tag, Discussion, FollowingHub, FollowingUser
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 def success_view(request):
     return render(request, 'success.html')
@@ -12,10 +15,12 @@ def success_view(request):
 def dashboard(request):
     user_posts = Post.objects.filter(author=request.user)
     user_hubs = Hub.objects.filter(author=request.user)
+    followed_hubs = Hub.objects.filter(followers__user=request.user)
     context = {
         'user_posts': user_posts,
         'user_hubs': user_hubs,
         'user_discussions': Discussion.objects.filter(author=request.user),
+        'followed_hubs': followed_hubs,
     }
     return render(request, 'dashboard.html', context)
 
@@ -168,13 +173,20 @@ def delete_hub_view(request, hub_id):
         return redirect('success')
     return render(request, 'confirm_action.html', {'obj': hub})
 
+@login_required
 def hub_detail_view(request, hub_id):
     hub = get_object_or_404(Hub, id=hub_id)
     posts = Post.objects.filter(hub=hub).prefetch_related('tags', 'author')
     discussions = Discussion.objects.filter(hub=hub).prefetch_related('tag', 'author')
+
+    followed_hubs = []
+    if request.user.is_authenticated:
+        followed_hubs = Hub.objects.filter(followers__user=request.user)
+
     if request.method == 'POST':
         if 'post_submit' in request.POST:
             post_form = PostForm(request.POST)
+            discussion_form = DiscussionForm(initial={'hub': hub})
             if post_form.is_valid():
                 post = post_form.save(commit=False)
                 post.hub = hub
@@ -182,9 +194,11 @@ def hub_detail_view(request, hub_id):
                 post.save()
                 post_form.save_m2m()
                 return redirect('hub_detail', hub_id=hub.id)
+
         elif 'discussion_submit' in request.POST:
             discussion_form = DiscussionForm(request.POST)
-            if form.is_valid():
+            post_form = PostForm(initial={'hub': hub}) 
+            if discussion_form.is_valid():
                 discussion = discussion_form.save(commit=False)
                 discussion.hub = hub
                 discussion.author = request.user
@@ -194,14 +208,17 @@ def hub_detail_view(request, hub_id):
     else:
         post_form = PostForm(initial={'hub': hub})
         discussion_form = DiscussionForm(initial={'hub': hub})
+
     context = {
         'hub': hub,
         'posts': posts,
         'discussions': discussions,
         'post_form': post_form,
         'discussion_form': discussion_form,
+        'followed_hubs': followed_hubs,
     }
     return render(request, 'hub_detail.html', context)
+
 
 # Voting Views
 @login_required
@@ -332,4 +349,29 @@ def hubs_overview_view(request):
     return render(request, 'hubs_overview.html', context)
 
 
+@login_required
+def follow_hub(request, hub_id):
+    hub = get_object_or_404(Hub, id=hub_id)
+    FollowingHub.objects.get_or_create(user=request.user, hub=hub)
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
 
+@login_required
+def unfollow_hub(request, hub_id):
+    hub = get_object_or_404(Hub, id=hub_id)
+    FollowingHub.objects.filter(user=request.user, hub=hub).delete()
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
+
+@login_required
+def follow_user(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    if target_user == request.user:
+        # Нельзя подписаться на себя
+        return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
+    FollowingUser.objects.get_or_create(user=request.user, following_user=target_user)
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
+
+@login_required
+def unfollow_user(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    FollowingUser.objects.filter(user=request.user, following_user=target_user).delete()
+    return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
