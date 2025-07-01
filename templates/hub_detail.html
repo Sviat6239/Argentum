@@ -72,18 +72,26 @@
     transform: translateY(-2px);
   }
 
-  .section {
+  .sections-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
     margin-top: 40px;
-    padding: 20px;
+  }
+
+  .section {
+    flex: 1;
+    min-width: 300px;
+    padding: 15px; /* Reduced padding */
     background: var(--form-bg);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-md);
   }
 
   .section h2 {
-    font-size: 1.75rem;
+    font-size: 1.5rem; /* Slightly smaller */
     color: var(--text-color);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-weight: 600;
   }
 
@@ -93,10 +101,10 @@
   }
 
   ul.post-list li, ul.discussion-list li {
-    padding: 15px;
+    padding: 12px; /* Reduced padding */
     border: 1px solid var(--input-border);
     border-radius: var(--border-radius);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     background: var(--form-bg);
     transition: var(--transition);
     display: flex;
@@ -127,21 +135,21 @@
     background: var(--secondary-color);
     padding: 4px 10px;
     border-radius: 12px;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Slightly smaller */
   }
 
   form {
     background: var(--form-bg);
-    padding: 25px;
+    padding: 15px; /* Reduced padding */
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-md);
-    margin-top: 20px;
+    margin-top: 15px;
     border: 1px solid var(--input-border);
   }
 
   form h3 {
     margin-top: 0;
-    font-size: 1.5rem;
+    font-size: 1.25rem; /* Smaller heading */
     color: var(--text-color);
     font-weight: 600;
   }
@@ -150,11 +158,11 @@
   form textarea,
   form select {
     width: 100%;
-    padding: 12px;
+    padding: 10px; /* Reduced padding */
     border: 2px solid var(--input-border);
     border-radius: var(--border-radius);
-    margin-bottom: 15px;
-    font-size: 1rem;
+    margin-bottom: 12px;
+    font-size: 0.9rem; /* Smaller font */
     background: var(--input-bg);
     color: var(--text-color);
     transition: var(--transition);
@@ -171,14 +179,14 @@
 
   form textarea {
     resize: vertical;
-    min-height: 140px;
+    min-height: 100px; /* Reduced height */
   }
 
   form button {
     background: var(--button-bg);
     color: #ffffff;
     border: none;
-    padding: 12px 20px;
+    padding: 10px 18px; /* Reduced padding */
     border-radius: var(--border-radius);
     font-weight: 600;
     cursor: pointer;
@@ -186,6 +194,7 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    font-size: 0.9rem; /* Smaller font */
   }
 
   form button:hover {
@@ -196,7 +205,7 @@
 
   form button::before {
     content: '➕';
-    font-size: 1rem;
+    font-size: 0.9rem; /* Smaller icon */
   }
 
   @media (max-width: 768px) {
@@ -208,12 +217,17 @@
       font-size: 1.75rem;
     }
 
+    .sections-container {
+      flex-direction: column;
+      gap: 15px;
+    }
+
     .section {
-      padding: 15px;
+      padding: 12px;
     }
 
     form {
-      padding: 20px;
+      padding: 15px;
     }
   }
 </style>
@@ -232,45 +246,47 @@
   {% endfor %}
 </div>
 
-<div class="section">
-  <h2>Posts in this Hub</h2>
-  <ul class="post-list">
-    {% for post in posts %}
-      <li>
-        <a href="{% url 'post_detail' post.id %}"><strong>{{ post.title }}</strong></a> — {{ post.author.username }}
-        <span class="vote-count">{{ post.vote_count }} ★</span>
-      </li>
-    {% empty %}
-      <li>No posts yet.</li>
-    {% endfor %}
-  </ul>
+<div class="sections-container">
+  <div class="section">
+    <h2>Posts in this Hub</h2>
+    <ul class="post-list">
+      {% for post in posts %}
+        <li>
+          <a href="{% url 'post_detail' post.id %}"><strong>{{ post.title }}</strong></a> — {{ post.author.username }}
+          <span class="vote-count">{{ post.vote_count }} ★</span>
+        </li>
+      {% empty %}
+        <li>No posts yet.</li>
+      {% endfor %}
+    </ul>
 
-  <form method="post" action="{% url 'create_post' hub.id %}">
-    {% csrf_token %}
-    <h3>Add a Post</h3>
-    {{ post_form.as_p }}
-    <button type="submit">Create Post</button>
-  </form>
-</div>
+    <form method="post" action="{% url 'create_post' hub.id %}">
+      {% csrf_token %}
+      <h3>Add a Post</h3>
+      {{ post_form.as_p }}
+      <button type="submit">Create Post</button>
+    </form>
+  </div>
 
-<div class="section">
-  <h2>Discussions in this Hub</h2>
-  <ul class="discussion-list">
-    {% for discussion in discussions %}
-      <li>
-        <a href="{% url 'discussion_detail' discussion.id %}"><strong>{{ discussion.title }}</strong></a> — {{ discussion.author.username }}
-        <span class="vote-count">{{ discussion.vote_count }} 💬</span>
-      </li>
-    {% empty %}
-      <li>No discussions yet.</li>
-    {% endfor %}
-  </ul>
+  <div class=" retirada do section">
+    <h2>Discussions in this Hub</h2>
+    <ul class="discussion-list">
+      {% for discussion in discussions %}
+        <li>
+          <a href="{% url 'discussion_detail' discussion.id %}"><strong>{{ discussion.title }}</strong></a> — {{ discussion.author.username }}
+          <span class="vote-count">{{ discussion.vote_count }} 💬</span>
+        </li>
+      {% empty %}
+        <li>No discussions yet.</li>
+      {% endfor %}
+    </ul>
 
-  <form method="post" action="{% url 'create_discussion' hub.id %}">
-    {% csrf_token %}
-    <h3>Start a Discussion</h3>
-    {{ discussion_form.as_p }}
-    <button type="submit">Create Discussion</button>
-  </form>
+    <form method="post" action="{% url 'create_discussion' hub.id %}">
+      {% csrf_token %}
+      <h3>Start a Discussion</h3>
+      {{ discussion_form.as_p }}
+      <button type="submit">Create Discussion</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

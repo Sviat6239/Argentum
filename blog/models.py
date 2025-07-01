@@ -17,7 +17,7 @@ class Category(models.Model):
         ordering = ['title']
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50, unique=True)  # Removed null=True, blank=True
+    name = models.CharField(max_length=50, unique=True)  
 
     def __str__(self):
         return self.name
@@ -64,7 +64,7 @@ class Discussion(models.Model):
 class Post(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
     hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='posts')
-    tags = models.ManyToManyField(Tag, related_name='posts', blank=True)  # Added blank=True
+    tags = models.ManyToManyField(Tag, related_name='posts', blank=True)  
     title = models.CharField(max_length=320)
     content = models.TextField()
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
@@ -124,3 +124,29 @@ class Vote(models.Model):
 
     def __str__(self):
         return f"{self.user.username} {self.get_value_display()} on {self.content_object}"
+    
+class FollowingHub(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='following_hubs')
+    hub = models.ForeignKey(Hub, on_delete=models.CASCADE, related_name='followers')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ('user', 'hub')
+        verbose_name = "Following Hub"
+        verbose_name_plural = "Following Hubs"
+
+    def __str__(self):
+        return f"{self.user.username} follows {self.hub.title}"
+
+class FollowingUser(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='following_users')
+    following_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='followers')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        unique_together = ('user', 'following_user')
+        verbose_name = "Following User"
+        verbose_name_plural = "Following Users"
+
+    def __str__(self):
+        return f"{self.user.username} follows {self.following_user.username}"        
