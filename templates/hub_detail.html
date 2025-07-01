@@ -235,6 +235,22 @@
 <div class="hub-header">
   <h1>{{ hub.title }}</h1>
   <p>{{ hub.description }}</p>
+
+  <p><strong>Followers:</strong> {{ hub.followers_count }}</p>
+
+  {% if user.is_authenticated %}
+    {% if hub in followed_hubs %}
+      <form method="post" action="{% url 'unfollow_hub' hub.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Unfollow</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'follow_hub' hub.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Follow</button>
+      </form>
+    {% endif %}
+  {% endif %}
 </div>
 
 <div class="categories">
@@ -268,7 +284,7 @@
     </form>
   </div>
 
-  <div class=" retirada do section">
+  <div class="section">
     <h2>Discussions in this Hub</h2>
     <ul class="discussion-list">
       {% for discussion in discussions %}
@@ -289,4 +305,5 @@
     </form>
   </div>
 </div>
+
 {% endblock %}
