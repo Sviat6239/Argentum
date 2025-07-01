@@ -35,6 +35,9 @@ class Hub(models.Model):
     categories = models.ManyToManyField(Category, related_name='hubs', blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 
+    def followers_count(self):
+        return self.followers.count()
+
     def __str__(self):
         return self.title
 
