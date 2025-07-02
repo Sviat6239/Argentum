@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from django.conf.urls.static import static
+from django.conf import settings
+
 
 urlpatterns = [
     path('success/', views.success_view, name='success'),
@@ -31,4 +34,7 @@ urlpatterns = [
     path('user/<int:user_id>/follow/', views.follow_user, name='follow_user'),
     path('user/<int:user_id>/unfollow/', views.unfollow_user, name='unfollow_user'),
 
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -235,6 +235,22 @@
 <div class="hub-header">
   <h1>{{ hub.title }}</h1>
   <p>{{ hub.description }}</p>
+
+  <p><strong>Followers:</strong> {{ hub.followers_count }}</p>
+
+  {% if user.is_authenticated %}
+    {% if hub in followed_hubs %}
+      <form method="post" action="{% url 'unfollow_hub' hub.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Unfollow</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'follow_hub' hub.id %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit">Follow</button>
+      </form>
+    {% endif %}
+  {% endif %}
 </div>
 
 <div class="categories">
@@ -260,15 +276,18 @@
       {% endfor %}
     </ul>
 
-    <form method="post" action="{% url 'create_post' hub.id %}">
+    <form method="post" action="{% url 'hub_detail' hub.id %}" enctype="multipart/form-data">
       {% csrf_token %}
+      <input type="hidden" name="post_submit" value="1">
       <h3>Add a Post</h3>
       {{ post_form.as_p }}
+      <label for="post_attachments">Attachments:</label>
+      <input type="file" name="attachments" multiple class="form-control-file" id="post_attachments">
       <button type="submit">Create Post</button>
     </form>
   </div>
 
-  <div class=" retirada do section">
+  <div class="section">
     <h2>Discussions in this Hub</h2>
     <ul class="discussion-list">
       {% for discussion in discussions %}
@@ -281,12 +300,16 @@
       {% endfor %}
     </ul>
 
-    <form method="post" action="{% url 'create_discussion' hub.id %}">
+    <form method="post" action="{% url 'hub_detail' hub.id %}" enctype="multipart/form-data">
       {% csrf_token %}
+      <input type="hidden" name="discussion_submit" value="1">
       <h3>Start a Discussion</h3>
       {{ discussion_form.as_p }}
+      <label for="discussion_attachments">Attachments:</label>
+      <input type="file" name="attachments" multiple class="form-control-file" id="discussion_attachments">
       <button type="submit">Create Discussion</button>
     </form>
   </div>
 </div>
+
 {% endblock %}

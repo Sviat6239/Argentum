@@ -16,6 +16,7 @@
     --transition: all 0.3s ease;
     --edit-bg: #28a745;
     --delete-bg: #dc3545;
+    --attachment-bg: #3b4a6b;
   }
 
   body {
@@ -34,7 +35,7 @@
     font-size: 1.1rem;
     line-height: 1.6;
     color: var(--muted-color);
-    margin-bottom: 30px;
+    margin-bottom: 20px;
   }
 
   hr {
@@ -67,7 +68,8 @@
   }
 
   form input[type="text"],
-  form textarea {
+  form textarea,
+  form input[type="file"] {
     width: 100%;
     padding: 10px;
     border: 2px solid var(--border-color);
@@ -78,7 +80,8 @@
   }
 
   form input[type="text"]:focus,
-  form textarea:focus {
+  form textarea:focus,
+  form input[type="file"]:focus {
     border-color: var(--primary-color);
     box-shadow: 0 0 8px rgba(74, 144, 226, 0.2);
     outline: none;
@@ -141,12 +144,95 @@
     color: var(--muted-color);
     font-style: italic;
   }
+
+  .attachments-container {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: var(--attachment-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+  }
+
+  .attachments-container h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 10px;
+  }
+
+  .attachment-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+  }
+
+  .attachment-item:hover {
+    background-color: #3b4a6b;
+    transform: translateY(-2px);
+  }
+
+  .attachment-item img {
+    max-width: 100px;
+    max-height: 100px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+  }
+
+  .attachment-item a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+  }
+
+  .attachment-item a:hover {
+    color: #357abd;
+    text-decoration: underline;
+  }
+
+  .attachment-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--muted-color);
+  }
 </style>
 
 <h2>{{ discussion.title }}</h2>
-<p>Author: {{ discussion.author.username }}</p>
+<p><strong>Author:</strong> {{ discussion.author.username }}</p>
 <p>{{ discussion.content }}</p>
-<p>Tags: {% for tag in discussion.tag.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% empty %}No tags{% endfor %}</p>
+<p>
+  <strong>Tags:</strong>
+  {% for tag in discussion.tags.all %}
+    {{ tag.name }}{% if not forloop.last %}, {% endif %}
+  {% empty %}
+    No tags
+  {% endfor %}
+</p>
+
+<!-- Display Discussion Attachments -->
+{% if discussion.attachments_with_basename %}
+  <div class="attachments-container">
+    <h4>Attachments</h4>
+    {% for attachment in discussion.attachments_with_basename %}
+      <div class="attachment-item">
+        {% if attachment.file.url|lower|slice:"-4:" in ".png,.jpg,.jpeg,.gif" %}
+          <img src="{{ attachment.file.url }}" alt="{{ attachment.basename }}">
+        {% else %}
+          <svg class="attachment-icon" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm-2.12 6.44l-6.44 6.44a1.5 1.5 0 01-2.12 0l-3.56-3.56a1.5 1.5 0 012.12-2.12l2.44 2.44 5.32-5.32a1.5 1.5 0 012.12 2.12z"/>
+          </svg>
+        {% endif %}
+        <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.basename }}</a>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 <div class="action-buttons">
   {% if discussion.author == request.user %}
@@ -170,9 +256,11 @@
 </div>
 
 <h3>Add a Comment</h3>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
   {% csrf_token %}
   {{ form.as_p }}
+  <label for="comment_attachments">Attachments:</label>
+  <input type="file" name="attachments" multiple id="comment_attachments" class="form-control-file">
   <button type="submit">Submit Comment</button>
 </form>
 
