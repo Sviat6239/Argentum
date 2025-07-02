@@ -276,10 +276,13 @@
       {% endfor %}
     </ul>
 
-    <form method="post" action="{% url 'create_post' hub.id %}">
+    <form method="post" action="{% url 'hub_detail' hub.id %}" enctype="multipart/form-data">
       {% csrf_token %}
+      <input type="hidden" name="post_submit" value="1">
       <h3>Add a Post</h3>
       {{ post_form.as_p }}
+      <label for="post_attachments">Attachments:</label>
+      <input type="file" name="attachments" multiple class="form-control-file" id="post_attachments">
       <button type="submit">Create Post</button>
     </form>
   </div>
@@ -297,10 +300,13 @@
       {% endfor %}
     </ul>
 
-    <form method="post" action="{% url 'create_discussion' hub.id %}">
+    <form method="post" action="{% url 'hub_detail' hub.id %}" enctype="multipart/form-data">
       {% csrf_token %}
+      <input type="hidden" name="discussion_submit" value="1">
       <h3>Start a Discussion</h3>
       {{ discussion_form.as_p }}
+      <label for="discussion_attachments">Attachments:</label>
+      <input type="file" name="attachments" multiple class="form-control-file" id="discussion_attachments">
       <button type="submit">Create Discussion</button>
     </form>
   </div>

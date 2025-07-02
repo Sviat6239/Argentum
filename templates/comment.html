@@ -1,4 +1,4 @@
-<li>
+<li style="background-color: var(--jumbotron-bg); border: 1px solid var(--accent1); padding: 15px; margin-bottom: 10px; border-radius: var(--border-radius); margin-left: {{ comment.indentation }}px;">
   <div style="display: flex; align-items: center; gap: 10px;">
     <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
     {% if comment.author == user %}
@@ -13,6 +13,27 @@
       </form>
     {% endif %}
   </div>
+
+  {% if comment.attachments_with_basename %}
+    <div class="attachments" style="margin-top: 15px;">
+      <strong>Attachments:</strong>
+      <ul style="list-style: none; padding: 0;">
+        {% for attachment in comment.attachments_with_basename %}
+          <li style="display: flex; align-items: center; gap: 10px; padding: 10px; margin-bottom: 10px; background-color: var(--jumbotron-bg); border: 1px solid var(--accent1); border-radius: var(--border-radius);">
+            {% if attachment.file.url|lower|slice:"-4:" in ".png,.jpg,.jpeg,.gif" %}
+              <img src="{{ attachment.file.url }}" alt="{{ attachment.basename }}" style="max-width: 100px; max-height: 100px; object-fit: cover; border-radius: var(--border-radius);">
+            {% else %}
+              <svg style="width: 24px; height: 24px; color: var(--accent1);" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19.5 3h-15A1.5 1.5 0 003 4.5v15A1.5 1.5 0 004.5 21h15a1.5 1.5 0 001.5-1.5v-15A1.5 1.5 0 0019.5 3zm-2.12 6.44l-6.44 6.44a1.5 1.5 0 01-2.12 0l-3.56-3.56a1.5 1.5 0 012.12-2.12l2.44 2.44 5.32-5.32a1.5 1.5 0 012.12 2.12z"/>
+              </svg>
+            {% endif %}
+            <a href="{{ attachment.file.url }}" target="_blank" style="color: var(--highlight-color); text-decoration: none; font-weight: 500;">{{ attachment.basename }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
   <div class="vote-controls">
     <form method="post" action="{% url 'upvote' content_type='comment' object_id=comment.id %}">
       {% csrf_token %}
@@ -31,27 +52,27 @@
     </button>
   </div>
 
-  <form id="reply-form-{{ comment.id }}" method="post" class="reply-form">
+  <form id="reply-form-{{ comment.id }}" method="post" enctype="multipart/form-data" class="reply-form">
     {% csrf_token %}
     {{ form.as_p }}
+    <label for="reply-attachments-{{ comment.id }}">Attachments:</label>
+    <input type="file" name="attachments" multiple id="reply-attachments-{{ comment.id }}" class="form-control-file">
     <input type="hidden" name="parent" value="{{ comment.id }}">
-    <button type="submit" class="animated-button">
-      Submit Reply
-    </button>
+    <button type="submit" class="animated-button">Submit Reply</button>
   </form>
 
   {% if comment.author == user %}
-    <form id="edit-form-{{ comment.id }}" method="post" action="{% url 'update_comment' comment_id=comment.id %}" class="reply-form">
+    <form id="edit-form-{{ comment.id }}" method="post" enctype="multipart/form-data" class="reply-form" action="{% url 'update_comment' comment_id=comment.id %}">
       {% csrf_token %}
       {{ form.as_p }}
-      <button type="submit" class="animated-button">
-        Save Changes
-      </button>
+      <label for="edit-attachments-{{ comment.id }}">Attachments:</label>
+      <input type="file" name="attachments" multiple id="edit-attachments-{{ comment.id }}" class="form-control-file">
+      <button type="submit" class="animated-button">Save Changes</button>
     </form>
   {% endif %}
 
   {% if comment.replies.all %}
-    <ul style="margin-left: 30px">
+    <ul style="list-style: none; padding: 0;">
       {% for reply in comment.replies.all %}
         {% include 'comment.html' with comment=reply user=user %}
       {% endfor %}

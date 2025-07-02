@@ -285,12 +285,47 @@
       padding: 10px;
     }
   }
+
+  .attachments {
+    margin-top: 15px;
+  }
+
+  .attachments ul li {
+    background-color: var(--jumbotron-bg);
+    border: 1px solid var(--accent1);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius);
+  }
+
+  .attachments ul li a {
+    color: var(--highlight-color);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .attachments ul li a:hover {
+    text-decoration: underline;
+  }
 </style>
 
 <div class="container">
   <h1>{{ post.title }}</h1>
-  <p>Author: {{ post.author.username }}</p>
+  <p><strong>Author:</strong> {{ post.author.username }}</p>
   <p>{{ post.content }}</p>
+
+  {% if post.attachments_with_basename %}
+    <div class="attachments">
+      <strong>Attachments:</strong>
+      <ul>
+        {% for attachment in post.attachments_with_basename %}
+          <li>
+            <a href="{{ attachment.file.url }}" target="_blank">{{ attachment.basename }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
 
   <div class="vote-controls">
     <form method="post" action="{% url 'upvote' content_type='post' object_id=post.id %}">
@@ -305,10 +340,9 @@
         Downvote
       </button>
     </form>
+
     {% if post.author == request.user %}
-      <a href="{% url 'update_post' post_id=post.id %}" class="animated-button edit">
-        Edit
-      </a>
+      <a href="{% url 'update_post' post_id=post.id %}" class="animated-button edit">Edit</a>
       <form method="post" action="{% url 'delete_post' post_id=post.id %}" style="display: inline;">
         {% csrf_token %}
         <button type="submit" class="animated-button delete" onclick="return confirm('Are you sure you want to delete this post?');">
@@ -320,7 +354,6 @@
 
   <hr>
   <h2>Comments</h2>
-
   <ul>
     {% for comment in comments %}
       {% include 'comment.html' with comment=comment user=request.user %}
@@ -331,12 +364,12 @@
 
   <hr>
   <h2>Add a Comment</h2>
-  <form method="post">
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="animated-button">
-      Submit
-    </button>
+    <label for="comment-attachments">Attachments:</label>
+    <input type="file" name="attachments" multiple id="comment-attachments" class="form-control-file">
+    <button type="submit" class="animated-button">Submit</button>
   </form>
 </div>
 
@@ -355,4 +388,5 @@
     }
   }
 </script>
+
 {% endblock %}
