@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Discussions by {{ user.username }}</h2>
+<ul>
+  {% for discussion in discussions %}
+    <li><a href="{% url 'discussion_detail' discussion.id %}">{{ discussion.title }}</a></li>
+  {% empty %}
+    <li>No discussions.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

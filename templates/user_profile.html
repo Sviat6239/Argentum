@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+:root {
+    --bg-color: #f4f4f7;
+    --text-color: #1e1e1e;
+    --accent1: #c0c0c0;
+    --accent2: #a6b0bb;
+    --jumbotron-bg: #ffffff;
+    --button-bg: #6c757d;
+    --button-text: #ffffff;
+    --toggler-icon-bg: #a0a0a0;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --border-radius: 10px;
+    --transition-speed: 0.3s;
+    --highlight-color: #ff5733;
+    --upvote-bg: #28a745;
+    --downvote-bg: #dc3545;
+    --vote-count-bg: #e9ecef;
+    --vote-count-text: #495057;
+    --category-bg: #d1e7dd;
+    --category-text: #0f5132;
+}
+.dark-mode {
+    --bg-color: #1a1c1e;
+    --text-color: #e0e0e0;
+    --accent1: #9fa8b0;
+    --accent2: #5c6370;
+    --jumbotron-bg: #2b2e32;
+    --button-bg: #5a6268;
+    --button-text: #ffffff;
+    --toggler-icon-bg: #d0d0d0;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --upvote-bg: #218838;
+    --downvote-bg: #c82333;
+    --vote-count-bg: #343a40;
+    --vote-count-text: #ced4da;
+    --category-bg: #495057;
+    --category-text: #e9ecef;
+}
+.user-profile-flex {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--bg-color);
+    padding: 40px 0;
+}
+.user-profile-block {
+    flex: 1 1 300px;
+    background: var(--jumbotron-bg);
+    color: var(--text-color);
+    padding: 24px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--primary-shadow);
+    min-width: 260px;
+    max-width: 400px;
+}
+.user-profile-block ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.user-profile-block h2, .user-profile-block h3 {
+    color: var(--highlight-color);
+    margin-bottom: 18px;
+}
+.user-profile-block li {
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+}
+.follow-btn {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 8px 20px;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transition-speed);
+    text-decoration: none;
+}
+.follow-btn:hover {
+    background: var(--highlight-color);
+    color: #fff;
+}
+@media (max-width: 900px) {
+    .user-profile-flex {
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+    .user-profile-block {
+        max-width: 95vw;
+    }
+}
+</style>
+
+<div class="user-profile-flex">
+    <div class="user-profile-block">
+        <h2>User Profile Overview</h2>
+        <ul>
+            <li><strong>Username:</strong> {{ user.username }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>First Name:</strong> {{ user.first_name }}</li>
+            <li><strong>Last Name:</strong> {{ user.last_name }}</li>
+            <li><strong>Date Joined:</strong> {{ user.date_joined }}</li>
+            <li><strong>Last Login:</strong> {{ user.last_login }}</li>
+        </ul>
+        {% if request.user != user %}
+            {% if is_following %}
+                <form method="post" action="{% url 'unfollow_user' user.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="follow-btn">Unfollow</button>
+                </form>
+            {% else %}
+                <form method="post" action="{% url 'follow_user' user.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="follow-btn">Follow</button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+    <div class="user-profile-block">
+        <h3>Statistics & Quick Access</h3>
+        <ul>
+            <li><strong><a href="{% url 'user_posts' user.id %}">Posts</a>:</strong> {{ user_posts|length }}</li>
+            <li><strong><a href="{% url 'user_hubs' user.id %}">Hubs</a>:</strong> {{ user_hubs|length }}</li>
+            <li><strong><a href="{% url 'user_discussions' user.id %}">Discussions</a>:</strong> {{ user_discussions|length }}</li>
+            <li><strong><a href="{% url 'user_comments' user.id %}">Comments</a>:</strong> {{ user.comments.all|length }}</li>
+            <li><strong><a href="{% url 'user_followed_hubs' user.id %}">Followed Hubs</a>:</strong> {{ followed_hubs|length }}</li>
+            <li><strong><a href="{% url 'user_followers' user.id %}">Followers</a>:</strong> {{ followers_count }}</li>
+            <li><strong><a href="{% url 'user_following' user.id %}">Following Users</a>:</strong> {{ following_count }}</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

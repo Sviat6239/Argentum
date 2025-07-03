@@ -204,7 +204,10 @@
 </style>
 
 <h2>{{ discussion.title }}</h2>
-<p><strong>Author:</strong> {{ discussion.author.username }}</p>
+<p>
+  <strong>Author:</strong>
+  <a href="{% url 'user_profile' discussion.author.id %}">{{ discussion.author.username }}</a>
+</p>
 <p>{{ discussion.content }}</p>
 <p>
   <strong>Tags:</strong>

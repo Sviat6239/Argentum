@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Hubs {{ user.username }} follows</h2>
+<ul>
+  {% for hub in hubs %}
+    <li><a href="{% url 'hub_detail' hub.id %}">{{ hub.title }}</a></li>
+  {% empty %}
+    <li>No followed hubs.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

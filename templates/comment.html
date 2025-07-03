@@ -1,6 +1,18 @@
 <li style="background-color: var(--jumbotron-bg); border: 1px solid var(--accent1); padding: 15px; margin-bottom: 10px; border-radius: var(--border-radius); margin-left: {{ comment.indentation }}px;">
+  <style>
+    .comment-content {
+      word-break: break-word;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+  </style>
   <div style="display: flex; align-items: center; gap: 10px;">
-    <strong>{{ comment.author.username }}:</strong> {{ comment.content }}
+    <strong>
+      <a href="{% url 'user_profile' comment.author.id %}" style="color: var(--highlight-color); text-decoration: none;">
+        {{ comment.author.username }}
+      </a>:
+    </strong>
+    <span class="comment-content">{{ comment.content }}</span>
     {% if comment.author == user %}
       <button onclick="toggleEditForm('{{ comment.id }}')" class="animated-button edit" style="margin-left: auto;">
         Edit

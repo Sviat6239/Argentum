@@ -311,7 +311,10 @@
 
 <div class="container">
   <h1>{{ post.title }}</h1>
-  <p><strong>Author:</strong> {{ post.author.username }}</p>
+  <p>
+    <strong>Author:</strong>
+    <a href="{% url 'user_profile' post.author.id %}">{{ post.author.username }}</a>
+  </p>
   <p>{{ post.content }}</p>
 
   {% if post.attachments_with_basename %}
