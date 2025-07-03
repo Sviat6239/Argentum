@@ -41,6 +41,7 @@ urlpatterns = [
     path('user/<int:user_id>/followed_hubs/', views.user_followed_hubs, name='user_followed_hubs'),
     path('user/<int:user_id>/followers/', views.user_followers, name='user_followers'),
     path('user/<int:user_id>/following/', views.user_following, name='user_following'),
+    path('following/', views.following_feed, name='following_feed'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

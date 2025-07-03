@@ -583,3 +583,21 @@ def user_following(request, user_id):
     user = get_object_or_404(User, id=user_id)
     following = FollowingUser.objects.filter(user=user)
     return render(request, "user_following.html", {"user": user, "following": following})
+
+@login_required
+def following_feed(request):
+    following_users = User.objects.filter(followers__user=request.user)
+    following_hubs = Hub.objects.filter(followers=request.user)
+
+    posts = Post.objects.filter(author__in=following_users) | Post.objects.filter(hub__in=following_hubs)
+    discussions = Discussion.objects.filter(author__in=following_users) | Discussion.objects.filter(hub__in=following_hubs)
+
+    posts = posts.distinct().order_by('-created_at')
+    discussions = discussions.distinct().order_by('-created_at')
+
+    return render(request, "following_feed.html", {
+        "posts": posts,
+        "discussions": discussions,
+        "following_users": following_users,
+        "following_hubs": following_hubs,
+    })
