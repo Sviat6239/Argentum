@@ -8,7 +8,6 @@
     <title>GroupPortal</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="{% static 'css/styles.css' %}" rel="stylesheet">
-
 </head>
 
 <body>
@@ -26,9 +25,12 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/recent">Recent</a>
                 </li>
-                {% if user.is_authenticated %}
+                {% if user.is_authenticated %}  
                 <li class="nav-item">
                     <a class="nav-link" href="/dashboard/">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'following_feed' %}">Following</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout/">Logout</a>
@@ -67,6 +69,4 @@
     <script src="{% static 'js/script.js' %}"></script>
 
 </body>
-
-
 </html>
