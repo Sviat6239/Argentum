@@ -1,0 +1,108 @@
+:root {
+    --bg-color: #f4f4f7;
+    --text-color: #1e1e1e;
+    --accent1: #c0c0c0;
+    --accent2: #a6b0bb;
+    --jumbotron-bg: #ffffff;
+    --button-bg: #6c757d;
+    --button-text: #ffffff;
+    --toggler-icon-bg: #a0a0a0;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --border-radius: 10px;
+    --transition-speed: 0.3s;
+    --highlight-color: #ff5733;
+    --upvote-bg: #28a745;
+    --downvote-bg: #dc3545;
+    --vote-count-bg: #e9ecef;
+    --vote-count-text: #495057;
+    --category-bg: #d1e7dd;
+    --category-text: #0f5132;
+}
+
+.dark-mode {
+    --bg-color: #1a1c1e;
+    --text-color: #e0e0e0;
+    --accent1: #9fa8b0;
+    --accent2: #5c6370;
+    --jumbotron-bg: #2b2e32;
+    --button-bg: #5a6268;
+    --button-text: #ffffff;
+    --toggler-icon-bg: #d0d0d0;
+    --primary-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    --upvote-bg: #218838;
+    --downvote-bg: #c82333;
+    --vote-count-bg: #343a40;
+    --vote-count-text: #ced4da;
+    --category-bg: #495057;
+    --category-text: #e9ecef;
+}
+
+.user-profile-flex {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    background: var(--bg-color);
+    padding: 40px 0;
+}
+
+.user-profile-block {
+    flex: 1 1 300px;
+    background: var(--jumbotron-bg);
+    color: var(--text-color);
+    padding: 24px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--primary-shadow);
+    min-width: 260px;
+    max-width: 400px;
+}
+
+.user-profile-block ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-profile-block h2,
+.user-profile-block h3 {
+    color: var(--highlight-color);
+    margin-bottom: 18px;
+}
+
+.user-profile-block li {
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+}
+
+.follow-btn {
+    display: inline-block;
+    margin-top: 18px;
+    padding: 8px 20px;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: var(--border-radius);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background var(--transition-speed);
+    text-decoration: none;
+}
+
+.follow-btn:hover {
+    background: var(--highlight-color);
+    color: #fff;
+}
+
+@media (max-width: 900px) {
+    .user-profile-flex {
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .user-profile-block {
+        max-width: 95vw;
+    }
+}

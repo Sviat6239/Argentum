@@ -33,6 +33,15 @@ urlpatterns = [
     path('hub/<int:hub_id>/unfollow/', views.unfollow_hub, name='unfollow_hub'),
     path('user/<int:user_id>/follow/', views.follow_user, name='follow_user'),
     path('user/<int:user_id>/unfollow/', views.unfollow_user, name='unfollow_user'),
+    path('user/<int:user_id>/', views.user_profile_view, name='user_profile'),
+    path('user/<int:user_id>/posts/', views.user_posts, name='user_posts'),
+    path('user/<int:user_id>/hubs/', views.user_hubs, name='user_hubs'),
+    path('user/<int:user_id>/discussions/', views.user_discussions, name='user_discussions'),
+    path('user/<int:user_id>/comments/', views.user_comments, name='user_comments'),
+    path('user/<int:user_id>/followed_hubs/', views.user_followed_hubs, name='user_followed_hubs'),
+    path('user/<int:user_id>/followers/', views.user_followers, name='user_followers'),
+    path('user/<int:user_id>/following/', views.user_following, name='user_following'),
+    path('following/', views.following_feed, name='following_feed'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

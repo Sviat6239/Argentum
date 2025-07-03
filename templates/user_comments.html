@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Comments by {{ user.username }}</h2>
+<ul>
+  {% for comment in comments %}
+    <li>
+      {{ comment.content|truncatechars:100 }}
+      {% if comment.post %}
+        <a href="{% url 'post_detail' comment.post.id %}">View Post</a>
+      {% elif comment.discussion %}
+        <a href="{% url 'discussion_detail' comment.discussion.id %}">View Discussion</a>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li>No comments.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

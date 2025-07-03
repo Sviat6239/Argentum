@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<link href="{% static 'css/following_feed.css' %}" rel="stylesheet">
+
+<div class="feed-header">
+  <h2>Feed from Following</h2>
+</div>
+
+<div class="section">
+  <h3>Recent Posts</h3>
+  <ul class="feed-list">
+    {% for post in posts %}
+      <li>
+        <a href="{% url 'post_detail' post.id %}">{{ post.title }}</a>
+        by <a href="{% url 'user_profile' post.author.id %}">{{ post.author.username }}</a>
+        <span class="feed-date">({{ post.created_at|date:"Y-m-d H:i" }})</span>
+      </li>
+    {% empty %}
+      <li class="feed-empty">No posts from followed users or hubs.</li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="section">
+  <h3>Recent Discussions</h3>
+  <ul class="feed-list">
+    {% for discussion in discussions %}
+      <li>
+        <a href="{% url 'discussion_detail' discussion.id %}">{{ discussion.title }}</a>
+        by <a href="{% url 'user_profile' discussion.author.id %}">{{ discussion.author.username }}</a>
+        <span class="feed-date">({{ discussion.created_at|date:"Y-m-d H:i" }})</span>
+      </li>
+    {% empty %}
+      <li class="feed-empty">No discussions from followed users or hubs.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

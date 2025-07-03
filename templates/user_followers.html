@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Followers of {{ user.username }}</h2>
+<ul>
+    {% for f in followers %}
+    <li><a href="{% url 'user_profile' f.user.id %}">{{ f.user.username }}</a></li>
+    {% empty %}
+    <li>No followers.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

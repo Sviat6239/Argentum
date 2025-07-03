@@ -251,7 +251,6 @@ def delete_hub_view(request, hub_id):
     return render(request, "confirm_action.html", {"obj": hub})
 
 
-@login_required
 def hub_detail_view(request, hub_id):
     hub = get_object_or_404(Hub, id=hub_id)
     posts = Post.objects.filter(hub=hub).prefetch_related("tags", "author")
@@ -432,7 +431,6 @@ def delete_discussion_view(request, pk):
     return render(request, "confirm_action.html", {"obj": discussion})
 
 
-@login_required
 def discussion_detail_view(request, pk):
     discussion = get_object_or_404(Discussion, pk=pk)
     comments = Comment.objects.filter(discussion=discussion, parent__isnull=True).prefetch_related(
@@ -519,3 +517,87 @@ def unfollow_user(request, user_id):
     target_user = get_object_or_404(User, id=user_id)
     FollowingUser.objects.filter(user=request.user, following_user=target_user).delete()
     return redirect(request.META.get("HTTP_REFERER", "dashboard"))
+
+@login_required
+def unfollow_user(request, user_id):
+    target_user = get_object_or_404(User, id=user_id)
+    FollowingUser.objects.filter(user=request.user, following_user=target_user).delete()
+    return redirect(request.META.get("HTTP_REFERER", "dashboard"))
+
+def user_profile_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user_posts = Post.objects.filter(author=user)
+    user_hubs = Hub.objects.filter(author=user)
+    user_discussions = Discussion.objects.filter(author=user)
+    followed_hubs = user.followed_hubs.all()
+    followers_count = FollowingUser.objects.filter(following_user=user).count()
+    following_count = FollowingUser.objects.filter(user=user).count()
+    is_following = False
+    if request.user.is_authenticated and request.user != user:
+        is_following = FollowingUser.objects.filter(user=request.user, following_user=user).exists()
+
+    context = {
+        "user": user,
+        "user_posts": user_posts,
+        "user_hubs": user_hubs,
+        "user_discussions": user_discussions,
+        "followed_hubs": followed_hubs,
+        "followers_count": followers_count,
+        "following_count": following_count,
+        "is_following": is_following,
+        "request": request,
+    }
+    return render(request, "user_profile.html", context)
+
+def user_posts(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    posts = Post.objects.filter(author=user)
+    return render(request, "user_posts.html", {"user": user, "posts": posts})
+
+def user_hubs(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    hubs = Hub.objects.filter(author=user)
+    return render(request, "user_hubs.html", {"user": user, "hubs": hubs})
+
+def user_discussions(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    discussions = Discussion.objects.filter(author=user)
+    return render(request, "user_discussions.html", {"user": user, "discussions": discussions})
+
+def user_comments(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    comments = Comment.objects.filter(author=user)
+    return render(request, "user_comments.html", {"user": user, "comments": comments})
+
+def user_followed_hubs(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    hubs = user.followed_hubs.all()
+    return render(request, "user_followed_hubs.html", {"user": user, "hubs": hubs})
+
+def user_followers(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    followers = FollowingUser.objects.filter(following_user=user)
+    return render(request, "user_followers.html", {"user": user, "followers": followers})
+
+def user_following(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    following = FollowingUser.objects.filter(user=user)
+    return render(request, "user_following.html", {"user": user, "following": following})
+
+@login_required
+def following_feed(request):
+    following_users = User.objects.filter(followers__user=request.user)
+    following_hubs = Hub.objects.filter(followers=request.user)
+
+    posts = Post.objects.filter(author__in=following_users) | Post.objects.filter(hub__in=following_hubs)
+    discussions = Discussion.objects.filter(author__in=following_users) | Discussion.objects.filter(hub__in=following_hubs)
+
+    posts = posts.distinct().order_by('-created_at')
+    discussions = discussions.distinct().order_by('-created_at')
+
+    return render(request, "following_feed.html", {
+        "posts": posts,
+        "discussions": discussions,
+        "following_users": following_users,
+        "following_hubs": following_hubs,
+    })

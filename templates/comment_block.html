@@ -1,6 +1,20 @@
 <div style="margin-left: {{ comment.indentation }}px; padding: 15px; background-color: var(--card-bg); border-radius: var(--border-radius); border: 1px solid var(--border-color); margin-bottom: 15px;">
-  <p><strong>{{ comment.author.username }}</strong> - {{ comment.created_at|date:"F j, Y, g:i a" }}</p>
-  <p>{{ comment.content }}</p>
+  <style>
+    .comment-content {
+      word-break: break-word;
+      white-space: pre-line;
+      overflow-wrap: anywhere;
+    }
+  </style>
+  <p>
+    <strong>
+      <a href="{% url 'user_profile' comment.author.id %}" style="color: var(--primary-color); text-decoration: none;">
+        {{ comment.author.username }}
+      </a>
+    </strong>
+    - {{ comment.created_at|date:"F j, Y, g:i a" }}
+  </p>
+  <p class="comment-content">{{ comment.content }}</p>
 
   <!-- Display Comment Attachments -->
   {% if comment.attachments_with_basename %}
