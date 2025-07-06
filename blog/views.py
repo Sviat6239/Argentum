@@ -1,12 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponseForbidden
+from django.http import JsonResponse, HttpResponseBadRequest, HttpResponseForbidden
+from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
-from .forms import PostForm, CommentForm, HubForm, DiscussionForm
-from .models import Post, Comment, Hub, Vote, Category, Tag, Discussion, FollowingHub, FollowingUser, Attachment
+from .forms import PublicChatForm, PrivateChatForm, MessageForm, PostForm, CommentForm, HubForm, DiscussionForm
+from .models import PublicChat, PrivateChat, Message, PublicChatRole, Attachment, Post, Comment, Hub, Vote, Category, Tag, Discussion, FollowingHub, FollowingUser
 from django.contrib.auth import get_user_model
 import os
-
 
 User = get_user_model()
 
@@ -601,3 +603,231 @@ def following_feed(request):
         "following_users": following_users,
         "following_hubs": following_hubs,
     })
+
+# Public Chat Views
+@login_required
+def public_chat_create(request):
+    if request.method == 'POST':
+        form = PublicChatForm(request.POST)
+        if form.is_valid():
+            chat = form.save(commit=False)
+            chat.owner = request.user
+            chat.admin = request.user
+            chat.save()
+            form.save_m2m()  # Save many-to-many fields
+            chat.members.add(request.user)  # Add creator as member
+            PublicChatRole.objects.create(
+                chat=chat,
+                user=request.user,
+                role_name='Owner',
+                permissions={'can_manage_chat': True, 'can_moderate': True}
+            )
+            if request.is_ajax():
+                return JsonResponse({
+                    'message': f"Public chat '{chat.title}' created successfully!",
+                    'chat_id': chat.id
+                })
+            messages.success(request, f"Public chat '{chat.title}' created successfully!")
+            return redirect('chat:public_chat_list')
+        else:
+            if request.is_ajax():
+                return JsonResponse({'errors': form.errors}, status=400)
+            messages.error(request, "Invalid form data.")
+    else:
+        form = PublicChatForm()
+    return render(request, 'chat/public_chat_form.html', {'form': form, 'action': 'Create'})
+
+@login_required
+def public_chat_update(request, pk):
+    chat = get_object_or_404(PublicChat, pk=pk)
+    role = PublicChatRole.objects.filter(chat=chat, user=request.user).first()
+    if request.user != chat.owner and not (role and role.permissions.get('can_manage_chat', False)):
+        messages.error(request, "You do not have permission to edit this chat.")
+        return redirect('chat:public_chat_list')
+
+    if request.method == 'POST':
+        form = PublicChatForm(request.POST, instance=chat)
+        if form.is_valid():
+            form.save()
+            if request.is_ajax():
+                return JsonResponse({
+                    'message': f"Public chat '{chat.title}' updated successfully!",
+                    'chat_id': chat.id
+                })
+            messages.success(request, f"Public chat '{chat.title}' updated successfully!")
+            return redirect('chat:public_chat_list')
+        else:
+            if request.is_ajax():
+                return JsonResponse({'errors': form.errors}, status=400)
+            messages.error(request, "Invalid form data.")
+    else:
+        form = PublicChatForm(instance=chat)
+    return render(request, 'chat/public_chat_form.html', {'form': form, 'action': 'Update'})
+
+@login_required
+def public_chat_delete(request, pk):
+    chat = get_object_or_404(PublicChat, pk=pk)
+    if request.user != chat.owner:
+        messages.error(request, "Only the owner can delete this chat.")
+        return redirect('chat:public_chat_list')
+
+    if request.method == 'POST':
+        title = chat.title
+        chat.delete()
+        if request.is_ajax():
+            return JsonResponse({'message': f"Public chat '{title}' deleted successfully!"})
+        messages.success(request, f"Public chat '{title}' deleted successfully!")
+        return redirect('chat:public_chat_list')
+    return render(request, 'chat/public_chat_confirm_delete.html', {'chat': chat})
+
+@login_required
+def public_chat_detail(request, pk):
+    chat = get_object_or_404(PublicChat, pk=pk)
+    messages = chat.messages.order_by('created_at')[:50]  # Load recent 50 messages
+    form = MessageForm(initial={'chat': chat})
+    is_member = chat.members.filter(id=request.user.id).exists()
+    role = PublicChatRole.objects.filter(chat=chat, user=request.user).first()
+    context = {
+        'chat': chat,
+        'messages': messages,
+        'form': form,
+        'is_member': is_member,
+        'role': role
+    }
+    return render(request, 'chat/public_chat_detail.html', context)
+
+# Message Views
+@login_required
+def message_create(request):
+    if request.method == 'POST':
+        form = MessageForm(request.POST, request.FILES)
+        if form.is_valid():
+            message = form.save(commit=False)
+            message.author = request.user
+            try:
+                message.full_clean()  # Validate the message
+                message.save()
+                # Handle file attachments
+                files = request.FILES.getlist('attachments')
+                for file in files:
+                    attachment = Attachment.objects.create(file=file, uploaded_by=request.user)
+                    message.files.add(attachment)
+                if request.is_ajax():
+                    return JsonResponse({
+                        'id': message.id,
+                        'content': message.content,
+                        'author': message.author.username,
+                        'created_at': message.created_at.isoformat(),
+                        'chat_type': 'PublicChat' if message.chat else 'PrivateChat'
+                    })
+                messages.success(request, "Message sent successfully!")
+                return redirect('chat:public_chat_detail', pk=message.chat.id if message.chat else message.private_chat.id)
+            except ValidationError as e:
+                if request.is_ajax():
+                    return JsonResponse({'errors': str(e)}, status=400)
+                messages.error(request, str(e))
+        else:
+            if request.is_ajax():
+                return JsonResponse({'errors': form.errors}, status=400)
+            messages.error(request, "Invalid message data.")
+    return HttpResponseBadRequest("Invalid request method.")
+
+@login_required
+def message_update(request, pk):
+    message = get_object_or_404(Message, pk=pk)
+    if message.author != request.user:
+        messages.error(request, "You can only edit your own messages.")
+        return redirect('chat:public_chat_detail', pk=message.chat.id if message.chat else message.private_chat.id)
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST, request.FILES, instance=message)
+        if form.is_valid():
+            message = form.save()
+            if request.is_ajax():
+                return JsonResponse({
+                    'message': "Message updated successfully!",
+                    'id': message.id,
+                    'content': message.content
+                })
+            messages.success(request, "Message updated successfully!")
+            return redirect('chat:public_chat_detail', pk=message.chat.id if message.chat else message.private_chat.id)
+        else:
+            if request.is_ajax():
+                return JsonResponse({'errors': form.errors}, status=400)
+            messages.error(request, "Invalid form data.")
+    else:
+        form = MessageForm(instance=message)
+    return render(request, 'chat/message_form.html', {'form': form, 'message': message})
+
+@login_required
+def message_delete(request, pk):
+    message = get_object_or_404(Message, pk=pk)
+    role = PublicChatRole.objects.filter(chat=message.chat, user=request.user).first() if message.chat else None
+    if message.author != request.user and not (role and role.permissions.get('can_moderate', False)):
+        messages.error(request, "You do not have permission to delete this message.")
+        return redirect('chat:public_chat_detail', pk=message.chat.id if message.chat else message.private_chat.id)
+
+    if request.method == 'POST':
+        chat_id = message.chat.id if message.chat else message.private_chat.id
+        message.delete()
+        if request.is_ajax():
+            return JsonResponse({'message': "Message deleted successfully!"})
+        messages.success(request, "Message deleted successfully!")
+        return redirect('chat:public_chat_detail', pk=chat_id)
+    return render(request, 'chat/message_confirm_delete.html', {'message': message})
+
+# Private Chat Views
+@login_required
+def private_chat_create(request):
+    if request.method == 'POST':
+        form = PrivateChatForm(request.POST)
+        if form.is_valid():
+            chat = form.save(commit=False)
+            chat.user1 = request.user
+            try:
+                chat.full_clean()  # Validate the chat
+                chat.save()
+                if request.is_ajax():
+                    return JsonResponse({
+                        'message': "Private chat created successfully!",
+                        'chat_id': chat.id
+                    })
+                messages.success(request, "Private chat created successfully!")
+                return redirect('chat:private_chat_list')
+            except ValidationError as e:
+                if request.is_ajax():
+                    return JsonResponse({'errors': str(e)}, status=400)
+                messages.error(request, str(e))
+        else:
+            if request.is_ajax():
+                return JsonResponse({'errors': form.errors}, status=400)
+            messages.error(request, "Invalid form data.")
+    else:
+        form = PrivateChatForm()
+    return render(request, 'chat/private_chat_form.html', {'form': form})
+
+@login_required
+def private_chat_delete(request, pk):
+    chat = get_object_or_404(PrivateChat, pk=pk)
+    if request.user not in [chat.user1, chat.user2]:
+        messages.error(request, "You do not have permission to delete this chat.")
+        return redirect('chat:private_chat_list')
+
+    if request.method == 'POST':
+        chat.delete()
+        if request.is_ajax():
+            return JsonResponse({'message': "Private chat deleted semessage_confirm_delete.htmluccessfully!"})
+        messages.success(request, "Private chat deleted successfully!")
+        return redirect('chat:private_chat_list')
+    return render(request, 'chat/private_chat_confirm_delete.html', {'chat': chat})
+
+# List Views
+@login_required
+def public_chat_list(request):
+    chats = PublicChat.objects.filter(Q(members=request.user) | Q(owner=request.user)).distinct()
+    return render(request, 'chat/public_chat_list.html', {'chats': chats})
+
+@login_required
+def private_chat_list(request):
+    chats = PrivateChat.objects.filter(Q(user1=request.user) | Q(user2=request.user)).distinct()
+    return render(request, 'chat/private_chat_list.html', {'chats': chats})

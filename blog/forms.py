@@ -147,6 +147,16 @@ class PublicChatForm(forms.ModelForm):
             'members': forms.SelectMultiple(attrs={'class': 'form-control'}),
         }
 
+class PublicChatRoleForm(forms.ModelForm):
+    class Meta:
+        model = PublicChat
+        fields = ['admin', 'moderators', 'members']
+        widgets = {
+            'admin': forms.Select(attrs={'class': 'form-control'}),
+            'moderators': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'members': forms.SelectMultiple(attrs={'class': 'form-control'}),
+        }        
+
 
 class PrivateChatForm(forms.ModelForm):
     class Meta:
