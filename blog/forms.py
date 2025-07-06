@@ -1,8 +1,21 @@
 from django import forms
-from .models import Post, Comment, Hub, Category, Tag, Discussion
+from .models import Post, Comment, Hub, Category, Tag, Discussion, PublicChat, PrivateChat, Message, Attachment
+
+class AttachmentForm(forms.ModelForm):
+    class Meta:
+        model = Attachment
+        fields = ['file']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'})
+        }
 
 
 class CommentForm(forms.ModelForm):
+    attachments = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'}),
+        required=False
+    )
+
     class Meta:
         model = Comment
         fields = ["content"]
@@ -68,14 +81,14 @@ class TagForm(forms.ModelForm):
 
 
 class PostForm(forms.ModelForm):
+    attachments = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'}),
+        required=False
+    )
+
     class Meta:
         model = Post
         fields = ["tags", "title", "content"]
-        labels = {
-            "tags": "Tags",
-            "title": "Title",
-            "content": "Content",
-        }
         widgets = {
             "tags": forms.SelectMultiple(
                 attrs={"size": 5, "class": "form-control"}
@@ -94,14 +107,14 @@ class PostForm(forms.ModelForm):
 
 
 class DiscussionForm(forms.ModelForm):
+    attachments = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'}),
+        required=False
+    )
+
     class Meta:
         model = Discussion
         fields = ["tags", "title", "content"]
-        labels = {
-            "tags": "Tags",
-            "title": "Title",
-            "content": "Content",
-        }
         widgets = {
             "tags": forms.SelectMultiple(
                 attrs={"size": 5, "class": "form-control"}
@@ -116,4 +129,52 @@ class DiscussionForm(forms.ModelForm):
                     "class": "form-control",
                 }
             ),
+        }
+
+
+class PublicChatForm(forms.ModelForm):
+    class Meta:
+        model = PublicChat
+        fields = ['title', 'description', 'tags', 'hub', 'owner', 'admin', 'moderators', 'members']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'tags': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'hub': forms.Select(attrs={'class': 'form-control'}),
+            'owner': forms.Select(attrs={'class': 'form-control'}),
+            'admin': forms.Select(attrs={'class': 'form-control'}),
+            'moderators': forms.SelectMultiple(attrs={'class': 'form-control'}),
+            'members': forms.SelectMultiple(attrs={'class': 'form-control'}),
+        }
+
+
+class PrivateChatForm(forms.ModelForm):
+    class Meta:
+        model = PrivateChat
+        fields = ['user1', 'user2']
+        widgets = {
+            'user1': forms.Select(attrs={'class': 'form-control'}),
+            'user2': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
+class MessageForm(forms.ModelForm):
+    attachments = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'}),
+        required=False
+    )
+    reply_to = forms.ModelChoiceField(
+        queryset=Message.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        help_text="Reply to a specific message (optional)"
+    )
+
+    class Meta:
+        model = Message
+        fields = ['chat', 'private_chat', 'content', 'reply_to']
+        widgets = {
+            'chat': forms.Select(attrs={'class': 'form-control'}),
+            'private_chat': forms.Select(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
         }
